@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 
 from storage.models import (
     OfferModel,
-    PriceHistoryModel,
     ProductIdentifierModel,
     ProductModel,
     RetailerProductModel,
@@ -34,7 +33,6 @@ class PipelineRepository:
         """Persist a ReconciliationReport with idempotent upserts and append-only price history."""
         products_count = 0
         offers_count = 0
-        history_count = 0
 
         for cluster in report.clusters:
             # 1. Upsert Canonical Product
@@ -119,9 +117,7 @@ class PipelineRepository:
                 )
                 offer_model = session.scalar(offer_stmt)
 
-                price_changed = False
                 if offer_model is None:
-                    price_changed = True
                     offer_model = OfferModel(
                         retailer_product_id=ret_product.id,
                         canonical_product_id=cluster.cluster_id,
@@ -147,13 +143,6 @@ class PipelineRepository:
                     session.flush()
                     offers_count += 1
                 else:
-                    if (
-                        offer_model.price_paise != offer_item.price_paise
-                        or offer_model.in_stock != offer_item.in_stock
-                        or offer_model.coupon_price_paise != offer_item.coupon_price_paise
-                    ):
-                        price_changed = True
-
                     offer_model.canonical_product_id = cluster.cluster_id
                     offer_model.price_paise = offer_item.price_paise
                     offer_model.mrp_paise = offer_item.mrp_paise
@@ -175,22 +164,7 @@ class PipelineRepository:
                     offer_model.updated_at = datetime.now(UTC)
                     offers_count += 1
 
-                # 4. Append to Price History only if price or stock state changed
-                if price_changed:
-                    history_entry = PriceHistoryModel(
-                        offer_id=offer_model.id,
-                        retailer_product_id=ret_product.id,
-                        canonical_product_id=cluster.cluster_id,
-                        price_paise=offer_item.price_paise,
-                        mrp_paise=offer_item.mrp_paise,
-                        coupon_price_paise=offer_item.coupon_price_paise,
-                        in_stock=offer_item.in_stock,
-                        observed_at=offer_item.observed_at,
-                    )
-                    session.add(history_entry)
-                    history_count += 1
-
-                # 5. Extract & Upsert Product Identifiers (MPN, GTIN, EAN, ASIN)
+                # 4. Extract & Upsert Product Identifiers (MPN, GTIN, EAN, ASIN)
                 identifiers_to_add: set[tuple[str, str]] = set()
                 if offer_item.source.lower() == "amazon" and offer_item.source_product_id:
                     identifiers_to_add.add(("ASIN", offer_item.source_product_id.strip()))
@@ -232,7 +206,6 @@ class PipelineRepository:
         return {
             "products_persisted": products_count,
             "offers_persisted": offers_count,
-            "price_history_records": history_count,
         }
 
     @classmethod
@@ -296,20 +269,6 @@ class PipelineRepository:
         """Retrieve a canonical product by id with all active offers."""
         stmt = select(ProductModel).where(ProductModel.id == product_id)
         return session.scalar(stmt)
-
-    @classmethod
-    def get_price_history_timeline(
-        cls,
-        session: Session,
-        canonical_product_id: str,
-    ) -> list[PriceHistoryModel]:
-        """Retrieve the historical price timeline for a canonical product."""
-        stmt = (
-            select(PriceHistoryModel)
-            .where(PriceHistoryModel.canonical_product_id == canonical_product_id)
-            .order_by(PriceHistoryModel.observed_at.asc())
-        )
-        return list(session.scalars(stmt).all())
 
     @classmethod
     def update_offer_lifecycle(

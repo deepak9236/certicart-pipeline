@@ -101,7 +101,6 @@ async def task_reconcile_and_persist(
     metrics: dict[str, int] = {
         "products_persisted": 0,
         "offers_persisted": 0,
-        "price_history_records": 0,
     }
 
     if persist:

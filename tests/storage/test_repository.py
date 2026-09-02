@@ -10,7 +10,6 @@ from sources.contracts import ParsedProduct
 from storage.models import (
     Base,
     OfferModel,
-    PriceHistoryModel,
     ProductModel,
     RetailerProductModel,
     ScrapeRunModel,
@@ -73,7 +72,6 @@ def test_idempotent_report_persistence(db_session: Session) -> None:
 
     assert res1["products_persisted"] == 1
     assert res1["offers_persisted"] == 1
-    assert res1["price_history_records"] == 1
 
     # Verify counts in DB
     assert (
@@ -89,7 +87,6 @@ def test_idempotent_report_persistence(db_session: Session) -> None:
         is not None
     )
     assert len(db_session.scalars(select(OfferModel)).all()) == 1
-    assert len(db_session.scalars(select(PriceHistoryModel)).all()) == 1
 
     # Re-run identical scrape 10 minutes later (Same price)
     t1 = t0 + timedelta(minutes=10)
@@ -101,11 +98,9 @@ def test_idempotent_report_persistence(db_session: Session) -> None:
 
     # Should update last_seen_at without duplicating records
     assert res2["products_persisted"] == 0
-    assert res2["price_history_records"] == 0
     assert len(db_session.scalars(select(ProductModel)).all()) == 1
     assert len(db_session.scalars(select(RetailerProductModel)).all()) == 1
     assert len(db_session.scalars(select(OfferModel)).all()) == 1
-    assert len(db_session.scalars(select(PriceHistoryModel)).all()) == 1
 
     # Verify last_seen_at was updated
     ret_prod = db_session.scalar(
@@ -138,7 +133,6 @@ def test_multi_retailer_canonical_linking(db_session: Session) -> None:
 
     assert res["products_persisted"] == 1
     assert res["offers_persisted"] == 2
-    assert res["price_history_records"] == 2
 
     # Verify single canonical product linked to both retailer products
     canonical_prod = PipelineRepository.get_canonical_product(
@@ -150,7 +144,7 @@ def test_multi_retailer_canonical_linking(db_session: Session) -> None:
     assert len(canonical_prod.offers) == 2
 
 
-def test_price_change_appends_history(db_session: Session) -> None:
+def test_price_change_updates_offer(db_session: Session) -> None:
     t0 = datetime.now(UTC)
     p1 = sample_parsed_product(
         "amazon", "B01", "Apple MacBook Air M5 16/512", price_paise=13490000, observed_at=t0
@@ -159,7 +153,9 @@ def test_price_change_appends_history(db_session: Session) -> None:
     PipelineRepository.persist_reconciliation_report(db_session, report1)
     db_session.commit()
 
-    assert len(db_session.scalars(select(PriceHistoryModel)).all()) == 1
+    offer1 = db_session.scalar(select(OfferModel).where(OfferModel.source_product_id == "B01"))
+    assert offer1 is not None
+    assert offer1.price_paise == 13490000
 
     # Price drops by ₹5,000 next day
     t1 = t0 + timedelta(days=1)
@@ -167,19 +163,12 @@ def test_price_change_appends_history(db_session: Session) -> None:
         "amazon", "B01", "Apple MacBook Air M5 16/512", price_paise=12990000, observed_at=t1
     )
     report2 = reconcile_products([p2])
-    res2 = PipelineRepository.persist_reconciliation_report(db_session, report2)
+    PipelineRepository.persist_reconciliation_report(db_session, report2)
     db_session.commit()
 
-    assert res2["price_history_records"] == 1
-    assert len(db_session.scalars(select(PriceHistoryModel)).all()) == 2
-
-    # Verify timeline
-    timeline = PipelineRepository.get_price_history_timeline(
-        db_session, report1.clusters[0].cluster_id
-    )
-    assert len(timeline) == 2
-    assert timeline[0].price_paise == 13490000
-    assert timeline[1].price_paise == 12990000
+    offer2 = db_session.scalar(select(OfferModel).where(OfferModel.source_product_id == "B01"))
+    assert offer2 is not None
+    assert offer2.price_paise == 12990000
 
 
 def test_scrape_run_lifecycle(db_session: Session) -> None:

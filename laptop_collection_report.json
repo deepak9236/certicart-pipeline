@@ -282,7 +282,7 @@
           "quality_status": "VALID",
           "quality_score": 100,
           "quality_flags": [],
-          "observed_at": "2026-09-02T14:56:46.100604Z"
+          "observed_at": "2026-09-02T16:52:20.795622Z"
         }
       ],
       "review_candidates": [],
@@ -342,7 +342,7 @@
           "quality_status": "VALID",
           "quality_score": 70,
           "quality_flags": [],
-          "observed_at": "2026-09-02T14:56:47.524524Z"
+          "observed_at": "2026-09-02T16:52:21.981103Z"
         }
       ],
       "review_candidates": [],
@@ -353,5 +353,5 @@
       "savings_paise": 0
     }
   ],
-  "generated_at": "2026-09-02T14:56:47.551528Z"
+  "generated_at": "2026-09-02T16:52:22.022012Z"
 }

@@ -65,10 +65,6 @@ class ProductModel(Base):
         "OfferModel",
         back_populates="canonical_product",
     )
-    price_history: Mapped[list[PriceHistoryModel]] = relationship(
-        "PriceHistoryModel",
-        back_populates="canonical_product",
-    )
 
 
 class RetailerProductModel(Base):
@@ -123,11 +119,6 @@ class RetailerProductModel(Base):
         "OfferModel",
         back_populates="retailer_product",
         uselist=False,
-        cascade="all, delete-orphan",
-    )
-    price_history: Mapped[list[PriceHistoryModel]] = relationship(
-        "PriceHistoryModel",
-        back_populates="retailer_product",
         cascade="all, delete-orphan",
     )
 
@@ -186,60 +177,6 @@ class OfferModel(Base):
     canonical_product: Mapped[ProductModel | None] = relationship(
         "ProductModel",
         back_populates="offers",
-    )
-    price_history: Mapped[list[PriceHistoryModel]] = relationship(
-        "PriceHistoryModel",
-        back_populates="offer",
-        cascade="all, delete-orphan",
-    )
-
-
-class PriceHistoryModel(Base):
-    """Append-only audit log of price observations."""
-
-    __tablename__ = "price_history"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    offer_id: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("offers.id", ondelete="CASCADE"),
-        index=True,
-        nullable=False,
-    )
-    retailer_product_id: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("retailer_products.id", ondelete="CASCADE"),
-        index=True,
-        nullable=False,
-    )
-    canonical_product_id: Mapped[str | None] = mapped_column(
-        String(64),
-        ForeignKey("products.id", ondelete="SET NULL"),
-        index=True,
-        nullable=True,
-    )
-    price_paise: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
-    mrp_paise: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
-    coupon_price_paise: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
-    in_stock: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    observed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=utc_now, nullable=False
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=utc_now, nullable=False
-    )
-
-    offer: Mapped[OfferModel] = relationship(
-        "OfferModel",
-        back_populates="price_history",
-    )
-    retailer_product: Mapped[RetailerProductModel] = relationship(
-        "RetailerProductModel",
-        back_populates="price_history",
-    )
-    canonical_product: Mapped[ProductModel | None] = relationship(
-        "ProductModel",
-        back_populates="price_history",
     )
 
 

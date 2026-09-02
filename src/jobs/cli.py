@@ -675,10 +675,7 @@ def bulk_collect(
                 db_metrics = PipelineRepository.persist_reconciliation_report(session, report)
             p_cnt = db_metrics["products_persisted"]
             o_cnt = db_metrics["offers_persisted"]
-            h_cnt = db_metrics["price_history_records"]
-            console.print(
-                f"[green]✓ DB: {p_cnt} products, {o_cnt} offers, {h_cnt} history rows.[/green]"
-            )
+            console.print(f"[green]✓ DB: {p_cnt} products, {o_cnt} offers.[/green]")
         except Exception as db_err:
             console.print(f"[yellow]! Database persistence note: {db_err}[/yellow]")
 
