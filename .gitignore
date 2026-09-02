@@ -1,0 +1,37 @@
+# Python bytecode and build output
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/
+build/
+dist/
+
+# Local environments and secrets
+.venv/
+.env
+.env.*
+!.env.example
+
+# Local data and crawler artifacts
+data/raw/
+data/processed/
+artifacts/
+downloads/
+*.sqlite3
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Playwright browser artifacts
+playwright-report/
+test-results/
+*.log
+

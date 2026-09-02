@@ -1,0 +1,209 @@
+from collections.abc import Generator
+from datetime import UTC, datetime, timedelta
+
+import pytest
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session, sessionmaker
+
+from matching.reconciliation import reconcile_products
+from sources.contracts import ParsedProduct
+from storage.models import (
+    Base,
+    OfferModel,
+    PriceHistoryModel,
+    ProductModel,
+    RetailerProductModel,
+    ScrapeRunModel,
+)
+from storage.repository import PipelineRepository
+
+
+@pytest.fixture
+def db_session() -> Generator[Session, None, None]:
+    """Create an isolated in-memory SQLite database session for testing."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(bind=engine)
+    session_factory = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+    session = session_factory()
+    yield session
+    session.close()
+
+
+def sample_parsed_product(
+    source: str,
+    source_product_id: str,
+    title: str,
+    price_paise: int = 5000000,
+    mrp_paise: int = 6000000,
+    in_stock: bool = True,
+    observed_at: datetime | None = None,
+) -> ParsedProduct:
+    return ParsedProduct(
+        source=source,
+        source_product_id=source_product_id,
+        category="laptop",
+        source_url=f"https://www.{source}.com/p/{source_product_id}",
+        title=title,
+        brand="Apple",
+        model_name="MacBook Air M5",
+        price_paise=price_paise,
+        mrp_paise=mrp_paise,
+        coupon_price_paise=None,
+        in_stock=in_stock,
+        seller="Authorized Retailer",
+        rating=4.8,
+        review_count=120,
+        observed_at=observed_at or datetime.now(UTC),
+        attributes={
+            "ram_gb": 16,
+            "storage_gb": 512,
+            "cpu_model": "apple m5",
+            "gpu_model": "integrated graphics",
+        },
+    )
+
+
+def test_idempotent_report_persistence(db_session: Session) -> None:
+    t0 = datetime.now(UTC)
+    p1 = sample_parsed_product("amazon", "B01", "Apple MacBook Air M5 16/512", observed_at=t0)
+    report1 = reconcile_products([p1])
+
+    res1 = PipelineRepository.persist_reconciliation_report(db_session, report1)
+    db_session.commit()
+
+    assert res1["products_persisted"] == 1
+    assert res1["offers_persisted"] == 1
+    assert res1["price_history_records"] == 1
+
+    # Verify counts in DB
+    assert (
+        db_session.scalar(
+            select(ProductModel).where(ProductModel.id == report1.clusters[0].cluster_id)
+        )
+        is not None
+    )
+    assert (
+        db_session.scalar(
+            select(RetailerProductModel).where(RetailerProductModel.source_product_id == "B01")
+        )
+        is not None
+    )
+    assert len(db_session.scalars(select(OfferModel)).all()) == 1
+    assert len(db_session.scalars(select(PriceHistoryModel)).all()) == 1
+
+    # Re-run identical scrape 10 minutes later (Same price)
+    t1 = t0 + timedelta(minutes=10)
+    p2 = sample_parsed_product("amazon", "B01", "Apple MacBook Air M5 16/512", observed_at=t1)
+    report2 = reconcile_products([p2])
+
+    res2 = PipelineRepository.persist_reconciliation_report(db_session, report2)
+    db_session.commit()
+
+    # Should update last_seen_at without duplicating records
+    assert res2["products_persisted"] == 0
+    assert res2["price_history_records"] == 0
+    assert len(db_session.scalars(select(ProductModel)).all()) == 1
+    assert len(db_session.scalars(select(RetailerProductModel)).all()) == 1
+    assert len(db_session.scalars(select(OfferModel)).all()) == 1
+    assert len(db_session.scalars(select(PriceHistoryModel)).all()) == 1
+
+    # Verify last_seen_at was updated
+    ret_prod = db_session.scalar(
+        select(RetailerProductModel).where(RetailerProductModel.source_product_id == "B01")
+    )
+    assert ret_prod is not None
+    assert ret_prod.last_seen_at.replace(tzinfo=UTC) == t1
+
+
+def test_multi_retailer_canonical_linking(db_session: Session) -> None:
+    p_amz = sample_parsed_product(
+        "amazon",
+        "B01_MAC",
+        "Apple 2026 MacBook Air 15″ Laptop with M5 chip, 16GB RAM, 512GB SSD",
+        price_paise=13490000,
+    )
+    p_flip = sample_parsed_product(
+        "flipkart",
+        "FLIP_MAC",
+        "Apple Macbook Air (M5, 2026) M5 - (16 GB/512 GB SSD/macOS) 15-inch",
+        price_paise=12990000,
+    )
+
+    report = reconcile_products([p_amz, p_flip])
+    assert report.total_clusters == 1
+    assert len(report.clusters[0].offers) == 2
+
+    res = PipelineRepository.persist_reconciliation_report(db_session, report)
+    db_session.commit()
+
+    assert res["products_persisted"] == 1
+    assert res["offers_persisted"] == 2
+    assert res["price_history_records"] == 2
+
+    # Verify single canonical product linked to both retailer products
+    canonical_prod = PipelineRepository.get_canonical_product(
+        db_session, report.clusters[0].cluster_id
+    )
+    assert canonical_prod is not None
+    assert len(canonical_prod.retailer_products) == 2
+    assert {rp.source for rp in canonical_prod.retailer_products} == {"amazon", "flipkart"}
+    assert len(canonical_prod.offers) == 2
+
+
+def test_price_change_appends_history(db_session: Session) -> None:
+    t0 = datetime.now(UTC)
+    p1 = sample_parsed_product(
+        "amazon", "B01", "Apple MacBook Air M5 16/512", price_paise=13490000, observed_at=t0
+    )
+    report1 = reconcile_products([p1])
+    PipelineRepository.persist_reconciliation_report(db_session, report1)
+    db_session.commit()
+
+    assert len(db_session.scalars(select(PriceHistoryModel)).all()) == 1
+
+    # Price drops by ₹5,000 next day
+    t1 = t0 + timedelta(days=1)
+    p2 = sample_parsed_product(
+        "amazon", "B01", "Apple MacBook Air M5 16/512", price_paise=12990000, observed_at=t1
+    )
+    report2 = reconcile_products([p2])
+    res2 = PipelineRepository.persist_reconciliation_report(db_session, report2)
+    db_session.commit()
+
+    assert res2["price_history_records"] == 1
+    assert len(db_session.scalars(select(PriceHistoryModel)).all()) == 2
+
+    # Verify timeline
+    timeline = PipelineRepository.get_price_history_timeline(
+        db_session, report1.clusters[0].cluster_id
+    )
+    assert len(timeline) == 2
+    assert timeline[0].price_paise == 13490000
+    assert timeline[1].price_paise == 12990000
+
+
+def test_scrape_run_lifecycle(db_session: Session) -> None:
+    run_id = PipelineRepository.start_scrape_run(db_session, source="amazon", category="laptop")
+    assert run_id is not None
+
+    run = db_session.scalar(select(ScrapeRunModel).where(ScrapeRunModel.id == run_id))
+    assert run is not None
+    assert run.status == "started"
+    assert run.source == "amazon"
+
+    PipelineRepository.finish_scrape_run(
+        db_session,
+        run_id=run_id,
+        status="completed",
+        items_discovered=50,
+        items_parsed=48,
+        items_persisted=48,
+    )
+    db_session.commit()
+
+    run_finished = db_session.scalar(select(ScrapeRunModel).where(ScrapeRunModel.id == run_id))
+    assert run_finished is not None
+    assert run_finished.status == "completed"
+    assert run_finished.items_persisted == 48
+    assert run_finished.duration_seconds is not None
+    assert run_finished.duration_seconds >= 0.0

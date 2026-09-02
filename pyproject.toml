@@ -1,0 +1,93 @@
+[project]
+name = "certikart-pipeline"
+version = "0.1.0"
+description = "Typed product collection, normalization, matching, pricing, and review pipeline for Certikart."
+readme = "README.md"
+authors = [
+    { name = "Ashish Jangde" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "alembic>=1.19.1",
+    "arq>=0.28.0",
+    "curl-cffi>=0.16.2",
+    "httpx[http2]>=0.28.1",
+    "orjson>=3.12.0",
+    "playwright>=1.62.0",
+    "prometheus-client>=0.26.0",
+    "psycopg[binary]>=3.3.4",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "rapidfuzz>=3.14.5",
+    "redis>=5.3.1",
+    "rich>=15.0.0",
+    "scikit-learn>=1.9.0",
+    "scrapy>=2.18.0",
+    "sqlalchemy>=2.0.52",
+    "structlog>=26.1.0",
+    "tenacity>=9.1.4",
+    "typer>=0.27.2",
+]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.9.4",
+    "hypothesis>=6.167.0",
+    "mypy>=2.3.1",
+    "pip-audit>=2.10.1",
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.5",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "C4", "PIE", "PT", "RUF", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "categories",
+    "collectors",
+    "jobs",
+    "matching",
+    "normalization",
+    "pricing",
+    "reviews",
+    "sources",
+    "storage",
+    "workers",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src", "tests"]
+mypy_path = "src"
+explicit_package_bases = true
+warn_unreachable = true
+show_error_codes = true
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib --strict-config --strict-markers --cov=src --cov-report=term-missing --cov-fail-under=80"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]

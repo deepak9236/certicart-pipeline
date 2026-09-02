@@ -1,0 +1,30 @@
+name: certikart-pipeline
+
+services:
+  pipeline:
+    image: ${CERTIKART_PIPELINE_IMAGE:?Set CERTIKART_PIPELINE_IMAGE to an immutable image tag or digest}
+    pull_policy: always
+    environment:
+      CERTIKART_ENVIRONMENT: production
+      CERTIKART_LOG_LEVEL: ${CERTIKART_LOG_LEVEL:-INFO}
+      CERTIKART_DATABASE_URL: ${CERTIKART_DATABASE_URL:?Set the managed PostgreSQL connection URL}
+      CERTIKART_REQUEST_TIMEOUT_SECONDS: ${CERTIKART_REQUEST_TIMEOUT_SECONDS:-30}
+      CERTIKART_MAX_SOURCE_CONCURRENCY: ${CERTIKART_MAX_SOURCE_CONCURRENCY:-2}
+      CERTIKART_OBEY_ROBOTS_TXT: ${CERTIKART_OBEY_ROBOTS_TXT:-true}
+      CERTIKART_COLLECTION_PROFILE: ${CERTIKART_COLLECTION_PROFILE:-incremental}
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    stop_grace_period: 30s
+    restart: "no"
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    command: ["doctor"]
