@@ -60,6 +60,9 @@ parse-demo: ## Run HTML/JSON-LD parser examples for configured retailers.
 reconcile-demo: ## Deduplicate and link products across all configured sources.
 	PYTHONPATH=src uv run python -m jobs.cli reconcile-demo
 
+benchmark: ## Run empirical accuracy & benchmark evaluation on deterministic matcher.
+	PYTHONPATH=src uv run python -m matching.benchmark_runner
+
 live-collect: ## Fetch live product pages over HTTP, parse, and reconcile.
 	PYTHONPATH=src uv run python -m jobs.cli live-collect
 
