@@ -1,75 +1,43 @@
-# Data Model and Invariants
+# Data Model, Invariants & Table Design 📊
 
-## Core identity graph
+## 1. Core Identity Graph
 
 ```text
 category
-  -> product_family
-       -> product_variant
-            -> variant_specification
-            -> evidence
-            -> offer
-                 -> seller
-                 -> price_observation
-            -> review
-                 -> review_aspect
+  -> product (canonical cluster)
+       -> product_identifiers (ASIN, MPN, GTIN, EAN)
+       -> retailer_product (store listing)
+            -> offer (live terms in integer paise)
 ```
 
-## Recommended tables
+---
 
-### Catalog
+## 2. PostgreSQL Relational Tables & Use-Cases
 
-- `categories`: laptop, monitor, GPU, and future category metadata.
-- `product_families`: human grouping such as "Lenovo ThinkBook 14 Gen 6".
-- `product_variants`: exact CPU/GPU/RAM/storage/display/OS configuration.
-- `variant_identifiers`: manufacturer part number, GTIN/EAN, retailer IDs, and aliases.
-- `specification_definitions`: category-specific field definitions, unit, validation range, and score eligibility.
-- `variant_specifications`: typed normalized values with provenance and confidence.
-- `evidence`: source URL, source type, observed time, content hash, permitted raw-object reference, and review state.
+### Catalog & Identity Layer
+- **`products`**: Master canonical catalog entries. Stores exact physical hardware attributes (RAM, storage, CPU, GPU, display, color) validated by category Pydantic schemas.
+- **`product_identifiers`**: First-class indexed hardware identifiers (`ASIN`, `MPN`, `GTIN`, `EAN`). Enforces global uniqueness and powers $O(1)$ fast reconciliation.
+- **`retailer_products`**: Specific store listing on Amazon, Flipkart, or Croma. Retains raw scraped titles, quality audit score, quality flags, and crawl timestamps.
 
-### Commerce and pricing
+### Commercial & Telemetry Layer
+- **`offers`**: Live commercial terms for each store listing (`price_paise`, `mrp_paise`, `coupon_price_paise`, `in_stock`, `seller`, `rating`).
+- **`scrape_runs`**: Operational crawl telemetry tracking items discovered, parsed, persisted, and run duration.
 
-- `retailers`: source configuration and collection policy.
-- `sellers`: seller identity scoped to a retailer.
-- `offers`: exact variant + retailer + seller + URL + external ID.
-- `price_observations`: immutable price, MRP, stock, seller, delivery context, and observed timestamp.
-- `conditional_offers`: coupon, card, exchange, EMI, membership, and eligibility metadata.
-- `daily_offer_prices`: derived minimum, maximum, last, sample count, and freshness.
+---
 
-### Recommendation and feedback
+## 3. Mandatory Invariants
 
-- `requirement_profiles`: confirmed structured profile, consent, and schema version.
-- `recommendation_runs`: input snapshot hash, engine version, candidate-set version, result, and latency.
-- `recommendation_items`: rank, fit score, confidence, contributions, reasons, and trade-offs.
-- `interaction_events`: impression, click, save, dismiss, compare, outbound click, and feedback.
-- `purchase_outcomes`: only when legitimately measurable and consented.
+1. **Integer Paise**: Monetary columns use non-negative `BIGINT` integer paise (`₹1,299.00` = `129900` paise).
+2. **UTC Timestamps**: Stored timestamps use `TIMESTAMPTZ` in UTC.
+3. **Idempotency**: Scraping and reconciliation runs are idempotent by `(source, source_product_id)`.
+4. **Hard Conflict Elimination**: Never merge variants solely from title similarity. Differences in RAM, Storage, CPU generation, or Screen Size trigger immediate conflict rejection.
+5. **Schema Validation**: Every category's attributes are validated by Pydantic models (`MobileAttributes`, `LaptopAttributes`) before persistence.
 
-### Reviews
+---
 
-- `reviews`: exact variant when known, source, source ID, rating, text, language, verified flag, and dates.
-- `review_aspects`: aspect, sentiment, confidence, evidence span, and target type.
-- `review_aggregates`: minimum-sample, time-decayed aspect summary with model version.
+## 4. Product Matching Order
 
-## Important invariants
-
-- Monetary columns use integer paise (`BIGINT`) with non-negative constraints.
-- Stored timestamps use `TIMESTAMPTZ` in UTC. Product-facing daily aggregation uses `Asia/Kolkata` explicitly.
-- Every normalized claim points to evidence and a transformation version.
-- `price_observations` are append-only and partitionable by observation date.
-- One source record is idempotent by `(source, source_product_id, content_hash)`.
-- One offer is unique by stable retailer product ID plus seller/variant context.
-- Published variants cannot lack their category's identity-critical fields.
-- Recommendation runs store engine and catalog snapshot versions for reproducibility.
-- User-identifying data is not copied into analytical evidence fields.
-
-## Product matching order
-
-1. Exact manufacturer part number.
-2. Exact GTIN/EAN plus region/configuration checks.
-3. Known retailer ID mapping.
-4. High-confidence structured fingerprint.
-5. Fuzzy candidate generation followed by deterministic field comparison.
-6. Manual review when confidence is below the publish threshold.
-
-Never merge variants solely from title similarity. RAM, storage, GPU, panel, OS, keyboard region, and warranty can differ within the same family.
-
+1. **Exact Hardware Identifier Match**: MPN, GTIN, EAN, or ASIN lookup via `product_identifiers`.
+2. **Deterministic Fingerprint Reconciliation**: 100-point scoring algorithm with brand, family, RAM, storage, screen size, and CPU comparison.
+3. **Hard Conflict Gate**: Immediate rejection if any identity-critical attribute mismatches.
+4. **Human Review Queue**: Candidates scoring between 60.0 and 85.0 confidence are routed to the review queue without auto-merging.
