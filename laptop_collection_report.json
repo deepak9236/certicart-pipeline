@@ -282,7 +282,7 @@
           "quality_status": "VALID",
           "quality_score": 100,
           "quality_flags": [],
-          "observed_at": "2026-09-02T16:52:20.795622Z"
+          "observed_at": "2026-09-02T17:00:15.692945Z"
         }
       ],
       "review_candidates": [],
@@ -332,7 +332,7 @@
           "source_product_id": "itm1bc0bcb4598e7",
           "source_url": "https://www.flipkart.com/acer-aspire-lite-amd-ryzen-3-quad-core-5400u-8-gb-512-gb-ssd-windows-11-home-al15-41-thin-light-laptop/p/itm1bc0bcb4598e7",
           "title": "Acer Aspire Lite AMD Ryzen 3 Quad Core 5400U - (8 GB/256 GB SSD/Windows 11 Home) AL15-41 Thin and Light Laptop Rs.44990  Price in India - Buy Acer Aspire Lite AMD Ryzen 3 Quad Core 5400U - (8 GB/256 GB SSD/Windows 11 Home) AL15-41 Thin and Light Laptop Steel Grey Online - Acer : Flipkart.com",
-          "price_paise": 5699100,
+          "price_paise": 5249000,
           "mrp_paise": null,
           "coupon_price_paise": null,
           "in_stock": true,
@@ -342,16 +342,16 @@
           "quality_status": "VALID",
           "quality_score": 70,
           "quality_flags": [],
-          "observed_at": "2026-09-02T16:52:21.981103Z"
+          "observed_at": "2026-09-02T17:00:17.166005Z"
         }
       ],
       "review_candidates": [],
-      "best_price_paise": 5699100,
+      "best_price_paise": 5249000,
       "best_source": "flipkart",
-      "max_price_paise": 5699100,
+      "max_price_paise": 5249000,
       "price_spread_paise": 0,
       "savings_paise": 0
     }
   ],
-  "generated_at": "2026-09-02T16:52:22.022012Z"
+  "generated_at": "2026-09-02T17:00:17.219196Z"
 }
