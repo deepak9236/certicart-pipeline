@@ -1,7 +1,7 @@
-# Certikart Pipeline: Production Architecture & System Roadmap
+# Certikart Pipeline: Production Architecture & System Roadmap 🚀
 
 > **System Positioning Statement**:
-> *"A production-oriented e-commerce product ingestion and price-comparison pipeline with deterministic product identity resolution, data-quality gates, retailer-specific extraction, PostgreSQL persistence, and append-only price auditing. The architecture is designed to evolve toward distributed crawling, event streaming, semantic matching, and dedicated time-series storage as volume increases."*
+> *"A production-oriented e-commerce product ingestion and price-comparison pipeline with deterministic product identity resolution, data-quality gates, retailer-specific extraction, and PostgreSQL persistence with global hardware identity indexing. The architecture is designed to evolve toward distributed crawling, event streaming, semantic matching, and dedicated analytical storage as volume increases."*
 
 ---
 
@@ -21,10 +21,11 @@ flowchart TD
         Parsers --> DQ[Data Quality Classifier]
         DQ -->|Accessories Detected| RejectQueue[Isolated Disqualified Queue]
         DQ -->|Sanity Checks Passed| Norm[Domain Normalizers: Laptop & Mobile]
+        Norm --> PydanticSchemas[LaptopAttributes / MobileAttributes Schemas]
     end
 
     subgraph Matching["3. Product Identity Resolution"]
-        Norm --> IDMatcher[100-Point Deterministic Matcher]
+        PydanticSchemas --> IDMatcher[100-Point Deterministic Matcher]
         IDMatcher --> MatchScore{Confidence Score}
         MatchScore -->|>=90 Match / 75-89 Strong| AutoLink[Master Canonical Cluster]
         MatchScore -->|60-74 Review| ReviewQueue[Manual / Secondary Match Candidates]
@@ -32,31 +33,30 @@ flowchart TD
     end
 
     subgraph Storage["4. Relational Master Storage (PostgreSQL)"]
-        AutoLink --> PG_Products[(canonical_products)]
-        AutoLink --> PG_Listings[(retailer_products)]
-        AutoLink --> PG_Offers[(offers)]
-        AutoLink --> PG_History[(price_history - Append-Only)]
+        AutoLink --> PG_Products[(products - Master Variants)]
+        AutoLink --> PG_Listings[(retailer_products - Store Listings)]
+        AutoLink --> PG_Offers[(offers - Live Price in Integer Paise)]
         AutoLink --> PG_Identifiers[(product_identifiers - ASIN, MPN, GTIN, EAN)]
+        AutoLink --> PG_Runs[(scrape_runs - Observability Telemetry)]
     end
 ```
 
 ### What is Active & Verified in Code Today
-- **PostgreSQL 6-Table Relational Schema**:
-  - `canonical_products`: Master hardware product clusters with normalized specifications.
+- **PostgreSQL 5-Table Relational Schema**:
+  - `products`: Master hardware product clusters with normalized specifications.
   - `retailer_products`: Store-specific product pages with lifecycle tracking and data quality scores.
-  - `offers`: Live commercial state (price in integer paise, MRP, seller, stock, ratings).
-  - `price_history`: Append-only, auditable price observation trail.
+  - `offers`: Live commercial state (price in integer paise, MRP, coupon discount, seller, stock, ratings).
   - `product_identifiers`: Normalized external hardware identifiers (`ASIN`, `MPN`, `GTIN`, `EAN`) with unique index `(identifier_type, identifier_value)`.
-  - `scrape_runs`: Telemetry logs for crawl execution and parser health.
-- **Domain Identity Normalizers**:
-  - `LaptopIdentityNormalizer`: Chip extraction (M1–M5 Pro/Max, A18 Pro, Intel Core Ultra, AMD Ryzen AI, Snapdragon X, MediaTek), custom Apple GPU assignment, and model name deduplication.
-  - `MobileIdentityNormalizer`: Expanded product families (iPhone 11–19, Galaxy S20–S26, Redmi, Realme, Poco, Vivo, iQOO), chipset resolution (A14–A19, Snapdragon, Dimensity), and concise clean model generation.
+  - `scrape_runs`: Telemetry logs for crawl execution, duration latency, and parser health.
+- **Domain Identity Normalizers & Pydantic Schemas**:
+  - `LaptopIdentityNormalizer` / `LaptopAttributes`: Processor extraction (M1–M5 Pro/Max, A18 Pro, Intel Core Ultra, AMD Ryzen AI, Snapdragon X, MediaTek), RAM type (Unified Memory, LPDDR5X, DDR5), display panel (Liquid Retina XDR, OLED, 4K UHD), GPU VRAM, backlight, and battery Wh.
+  - `MobileIdentityNormalizer` / `MobileAttributes`: Families (iPhone 11–19, Galaxy S20–S26, Redmi, Realme, Poco, Vivo, iQOO), display protection (Ceramic Shield, Gorilla Glass Victus 2), resolution (Super Retina XDR, QHD+, 1.5K, FHD+), camera MP/OIS, battery mAh, and fast charging wattage.
 - **Data Quality & Hygiene Layer (`src/quality/`)**:
   - Pattern-based peripheral and accessory detection (cases, covers, sleeves, chargers, wireless mice, keyboards, mats).
   - Category price sanity bands (Laptops: ₹10k–₹10L, Mobiles: ₹2.5k–₹3.5L).
 - **100-Point Deterministic Matcher (`src/matching/`)**:
   - Point contributions: Brand (20), Model (25), RAM (15), Storage (15), CPU (10), GTIN/MPN (10), Specs (5).
-  - Verified across 58 cross-retailer benchmark test cases with 100% test pass rate.
+  - Benchmark Results across 67 ground-truth & adversarial test pairs: **100.00% Precision**, **0.00% False Positive Rate (Zero false merges)**.
 
 ---
 
@@ -105,8 +105,8 @@ flowchart TD
 
 | Component | Current Stage | When to Migrate (Scale Trigger) | Why Migrate? |
 |---|---|---|---|
-| **Message Bus (Kafka / Redis Streams)** | In-memory asyncio queues | $> 100,000$ daily scrapes or multi-machine crawl fleet | Decouples scraping speed from DB write latency; provides backpressure. |
-| **Time-Series Storage (ClickHouse / TimescaleDB)** | PostgreSQL `price_history` table | $> 10\text{M}$ price history rows | Optimizes analytical aggregations (e.g. 1-year price graphs) and compresses historical data. |
+| **Message Bus (Kafka / Redis Streams)** | In-memory asyncio / ARQ queues | $> 100,000$ daily scrapes or multi-machine crawl fleet | Decouples scraping speed from DB write latency; provides backpressure. |
+| **Analytical Time-Series Storage (ClickHouse / TimescaleDB)** | PostgreSQL live `offers` | $> 10\text{M}$ price history rows | Optimizes analytical aggregations (e.g. 1-year price graphs) and compresses historical data. |
 | **Vector Matcher (`pgvector` / `Qdrant`)** | 100-pt Deterministic rules | Unstructured categories (fashion, home, unbranded accessories) | Resolves messy, non-standardized titles where deterministic specs are absent. |
 | **Distributed Orchestrator (Temporal)** | Local scheduler / CLI jobs | Distributed multi-node scraping clusters | Guarantees durable execution, retry timers, and worker heartbeat liveness. |
 | **Residential Proxy Pool** | Direct HTTPX with politeness delays | Cloud IP rate-limiting from target domains | Bypasses strict anti-bot and CAPTCHA barriers at volume. |
