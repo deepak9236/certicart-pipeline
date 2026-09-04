@@ -144,6 +144,19 @@ class LaptopIdentityNormalizer:
 
     @classmethod
     def extract_chip(cls, title: str, specs: dict[str, str] | None = None) -> str | None:
+        # Check rich specs first if present (contains exact processor name / variant / cpu_model)
+        if specs:
+            if "cpu_model" in specs and specs["cpu_model"].strip():
+                return specs["cpu_model"].casefold().strip()
+            if "processor name" in specs and specs["processor name"].strip():
+                p_name = specs["processor name"].strip()
+                p_var = specs.get("processor variant", "").strip()
+                p_brand = specs.get("processor brand", "").strip()
+                full_p = f"{p_name} {p_var}".strip()
+                if p_brand and p_brand.lower() not in full_p.lower():
+                    full_p = f"{p_brand} {full_p}".strip()
+                return full_p.casefold()
+
         title_lower = title.casefold()
 
         # 1. Apple Silicon M-series & A-series
@@ -219,9 +232,22 @@ class LaptopIdentityNormalizer:
 
         # Fallback to specs if present
         if specs:
-            for k in ("processor", "cpu_model", "processor type", "processor name", "chipset"):
+            for k in (
+                "processor name",
+                "cpu model",
+                "processor",
+                "cpu_model",
+                "processor type",
+                "chipset",
+            ):
                 if k in specs and specs[k].strip():
-                    return specs[k].casefold().strip()
+                    p_val = specs[k].strip()
+                    p_var = specs.get("processor variant", "").strip()
+                    p_brand = specs.get("processor brand", "").strip()
+                    full_p = f"{p_val} {p_var}".strip()
+                    if p_brand and p_brand.lower() not in full_p.lower():
+                        full_p = f"{p_brand} {full_p}".strip()
+                    return full_p.casefold()
 
         return None
 
@@ -247,8 +273,10 @@ class LaptopIdentityNormalizer:
         if intel_arc:
             return intel_arc.group(1).strip()
 
-        if specs and "graphics" in specs:
-            return specs["graphics"].casefold().strip()
+        if specs:
+            for k in ("graphic processor", "graphics processor", "graphics", "gpu", "gpu_model"):
+                if k in specs and specs[k].strip():
+                    return specs[k].casefold().strip()
 
         # Apple Silicon custom GPU
         apple_m = re.search(r"\b(m[1-5](?:\s+(?:pro|max|ultra))?)\b", title_lower)
@@ -305,7 +333,9 @@ class LaptopIdentityNormalizer:
         return None
 
     @classmethod
-    def extract_screen_size_inches(cls, title: str) -> float | None:
+    def extract_screen_size_inches(
+        cls, title: str, specs: dict[str, str] | None = None
+    ) -> float | None:
         title_lower = title.casefold()
         match = re.search(
             r"\b(\d{2}(?:\.\d{1,2})?)\s*(?:inch|inches|\"|\s*-inch|\s*cm)\b",
@@ -313,15 +343,37 @@ class LaptopIdentityNormalizer:
         )
         if match:
             raw_val = match.group(1)
-            try:
+            with contextlib.suppress(ValueError):
                 val = float(raw_val)
                 # Convert cm to inches if in reasonable laptop range
                 if val > 25.0:
                     val = round(val / 2.54, 1)
                 if 10.0 <= val <= 20.0:
                     return val
-            except ValueError:
-                pass
+        if specs:
+            for k in (
+                "screen size",
+                "display size",
+                "screen size (in cm)",
+                "screen size (in inches)",
+                "screen dimensions",
+            ):
+                if k in specs:
+                    raw_spec = specs[k]
+                    inch_m = re.search(
+                        r"(\d{2}(?:\.\d{1,2})?)\s*(?:inch|inches|\")", raw_spec, re.I
+                    )
+                    if inch_m:
+                        with contextlib.suppress(ValueError):
+                            return float(inch_m.group(1))
+                    num_m = re.search(r"(\d+(?:\.\d+)?)", raw_spec)
+                    if num_m:
+                        with contextlib.suppress(ValueError):
+                            val = float(num_m.group(1))
+                            if val > 25.0:
+                                val = round(val / 2.54, 1)
+                            if 10.0 <= val <= 20.0:
+                                return val
         return None
 
     @classmethod
@@ -386,6 +438,13 @@ class LaptopIdentityNormalizer:
         if m:
             with contextlib.suppress(ValueError):
                 return float(m.group(1))
+        if specs and "weight" in specs:
+            m = re.search(r"(\d+(?:\.\d+)?)\s*kg", specs["weight"].casefold())
+            if m:
+                with contextlib.suppress(ValueError):
+                    val = float(m.group(1))
+                    if 0.5 <= val <= 10.0:
+                        return val
         return None
 
     @classmethod
@@ -395,6 +454,15 @@ class LaptopIdentityNormalizer:
         if m:
             with contextlib.suppress(ValueError):
                 return float(m.group(1))
+        if specs:
+            for k in ("battery cell", "battery", "battery capacity"):
+                if k in specs:
+                    m = re.search(r"(\d{2,3}(?:\.\d)?)\s*wh", specs[k].casefold())
+                    if m:
+                        with contextlib.suppress(ValueError):
+                            val = float(m.group(1))
+                            if 10.0 <= val <= 150.0:
+                                return val
         return None
 
     @classmethod
@@ -417,7 +485,7 @@ class LaptopIdentityNormalizer:
         gpu = cls.extract_gpu(title, specs)
         ram_gb = cls.extract_ram_gb(title, specs)
         storage_gb = cls.extract_storage_gb(title, specs)
-        screen_size = cls.extract_screen_size_inches(title)
+        screen_size = cls.extract_screen_size_inches(title, specs)
         generation = cls.extract_generation(title)
         ram_type = cls.extract_ram_type(title, specs)
         display_res = cls.extract_display_resolution(title, specs)

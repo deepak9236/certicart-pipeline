@@ -29,7 +29,7 @@
   },
   "clusters": [
     {
-      "cluster_id": "clus_e61316d0f4653aba",
+      "cluster_id": "clus_d5e9adf755d7c9a5",
       "category": "laptop",
       "brand": "apple",
       "model_name": "macbook air m5",
@@ -40,8 +40,10 @@
         "cpu_model": "m5",
         "gpu_model": "m5 gpu",
         "screen_size_inches": 13.6,
+        "operating_system": "macos tahoe",
         "color": "black",
         "keyboard_backlight": true,
+        "model_number": "mdhe4hn/a",
         "laptop type": "macbook",
         "suitable for": "work, gaming, entertainment, everyday use",
         "launch year": "2026",
@@ -163,8 +165,10 @@
           "cpu_model": "m5",
           "gpu_model": "m5 gpu",
           "screen_size_inches": 13.6,
+          "operating_system": "macos tahoe",
           "color": "black",
           "keyboard_backlight": true,
+          "model_number": "mdhe4hn/a",
           "laptop type": "macbook",
           "suitable for": "work, gaming, entertainment, everyday use",
           "launch year": "2026",
@@ -282,7 +286,7 @@
           "quality_status": "VALID",
           "quality_score": 100,
           "quality_flags": [],
-          "observed_at": "2026-09-02T17:00:15.692945Z"
+          "observed_at": "2026-09-04T16:27:36.198233Z"
         }
       ],
       "review_candidates": [],
@@ -293,46 +297,64 @@
       "savings_paise": 0
     },
     {
-      "cluster_id": "clus_7aae8ec77186aef7",
+      "cluster_id": "clus_eba681ee6dee8378",
       "category": "laptop",
-      "brand": "acer",
-      "model_name": "acer aspire lite ryzen 3 8gb / 256gb",
+      "brand": "asus",
+      "model_name": "asus expertbook 32gb / 1024gb",
       "attributes": {
-        "ram_gb": 8,
-        "storage_gb": 256,
+        "ram_gb": 32,
+        "storage_gb": 1024,
         "storage_type": "ssd",
-        "cpu_model": "ryzen 3",
-        "gpu_model": "integrated graphics"
+        "flipkart": "a one-stop shopping",
+        "minutes": "everything in minutes",
+        "grocery": "at wholesale prices",
+        "travel": "all your travel needs",
+        "/": "asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop",
+        "1,76,990": "asus expertbook p3 ai pc with 1 yr adp intel core ultra 5 225h - (16 gb/512 gb ssd/windows 11 home) p3606ccap-mb1005ws laptop",
+        "1,92,990": "asus expertbook p3 ai pc with 1 yr adp ir cam intel core ultra 7 255h - (16 gb/512 gb ssd/windows 11 home) p3606ccap-mb0056ws / p3606ccap-mb0432ws thin and light laptop",
+        "64 gb": "32 gb",
+        "4,49,990": "1 tb, 14 inch",
+        "4.5": "delivery & installation details",
+        "spec_sections": "{\"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\"}, \"manufacturer info\": {\"/\": \"asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop\", \"1,76,990\": \"\\u20b994,990\", \"1,92,990\": \"\\u20b91,09,990\", \"64 gb\": \"32 gb\", \"4,49,990\": \"\\u20b92,72,990\", \"4.5\": \"location not set\"}}"
       },
       "fingerprint": {
         "category": "laptop",
-        "brand": "acer",
-        "family": "aspire lite",
-        "model_name": "acer aspire lite ryzen 3 8gb / 256gb",
+        "brand": "asus",
+        "family": "expertbook",
+        "model_name": "asus expertbook 32gb / 1024gb",
         "generation": null,
-        "chip": "ryzen 3",
-        "ram_gb": 8,
-        "storage_gb": 256,
+        "chip": null,
+        "ram_gb": 32,
+        "storage_gb": 1024,
         "storage_type": "ssd",
         "screen_size_inches": null,
-        "gpu_model": "integrated graphics",
+        "gpu_model": null,
         "manufacturer_part_number": null,
         "gtin": null,
         "attributes": {
-          "ram_gb": 8,
-          "storage_gb": 256,
+          "ram_gb": 32,
+          "storage_gb": 1024,
           "storage_type": "ssd",
-          "cpu_model": "ryzen 3",
-          "gpu_model": "integrated graphics"
+          "flipkart": "a one-stop shopping",
+          "minutes": "everything in minutes",
+          "grocery": "at wholesale prices",
+          "travel": "all your travel needs",
+          "/": "asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop",
+          "1,76,990": "asus expertbook p3 ai pc with 1 yr adp intel core ultra 5 225h - (16 gb/512 gb ssd/windows 11 home) p3606ccap-mb1005ws laptop",
+          "1,92,990": "asus expertbook p3 ai pc with 1 yr adp ir cam intel core ultra 7 255h - (16 gb/512 gb ssd/windows 11 home) p3606ccap-mb0056ws / p3606ccap-mb0432ws thin and light laptop",
+          "64 gb": "32 gb",
+          "4,49,990": "1 tb, 14 inch",
+          "4.5": "delivery & installation details",
+          "spec_sections": "{\"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\"}, \"manufacturer info\": {\"/\": \"asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop\", \"1,76,990\": \"\\u20b994,990\", \"1,92,990\": \"\\u20b91,09,990\", \"64 gb\": \"32 gb\", \"4,49,990\": \"\\u20b92,72,990\", \"4.5\": \"location not set\"}}"
         }
       },
       "offers": [
         {
           "source": "flipkart",
-          "source_product_id": "itm1bc0bcb4598e7",
-          "source_url": "https://www.flipkart.com/acer-aspire-lite-amd-ryzen-3-quad-core-5400u-8-gb-512-gb-ssd-windows-11-home-al15-41-thin-light-laptop/p/itm1bc0bcb4598e7",
-          "title": "Acer Aspire Lite AMD Ryzen 3 Quad Core 5400U - (8 GB/256 GB SSD/Windows 11 Home) AL15-41 Thin and Light Laptop Rs.44990  Price in India - Buy Acer Aspire Lite AMD Ryzen 3 Quad Core 5400U - (8 GB/256 GB SSD/Windows 11 Home) AL15-41 Thin and Light Laptop Steel Grey Online - Acer : Flipkart.com",
-          "price_paise": 5249000,
+          "source_product_id": "itm8f6006a76d8bf",
+          "source_url": "https://www.flipkart.com/asus-expertbook-ultra-copilot-pc-intel-core-x7-358h-32-gb-1-tb-ssd-windows-11-home-b9406caa-th1205ws-thin-light-laptop/p/itm8f6006a76d8bf",
+          "title": "ASUS ExpertBook Ultra Copilot+ PC Intel Core Ultra X7 358H - (32 GB/1 TB SSD/Windows 11 Home) B9406CAA-TH1205WS Thin and Light Laptop Rs.449990  Price in India - Buy ASUS ExpertBook Ultra Copilot+ PC Intel Core Ultra X7 358H - (32 GB/1 TB SSD/Windows 11 Home) B9406CAA-TH1205WS Thin and Light Laptop Jet Fog Online - ASUS : Flipkart.com",
+          "price_paise": 27299000,
           "mrp_paise": null,
           "coupon_price_paise": null,
           "in_stock": true,
@@ -342,16 +364,16 @@
           "quality_status": "VALID",
           "quality_score": 70,
           "quality_flags": [],
-          "observed_at": "2026-09-02T17:00:17.166005Z"
+          "observed_at": "2026-09-04T16:27:38.090608Z"
         }
       ],
       "review_candidates": [],
-      "best_price_paise": 5249000,
+      "best_price_paise": 27299000,
       "best_source": "flipkart",
-      "max_price_paise": 5249000,
+      "max_price_paise": 27299000,
       "price_spread_paise": 0,
       "savings_paise": 0
     }
   ],
-  "generated_at": "2026-09-02T17:00:17.219196Z"
+  "generated_at": "2026-09-04T16:27:38.133413Z"
 }

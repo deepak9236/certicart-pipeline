@@ -19,6 +19,123 @@ from sources.common import (
 from sources.contracts import ParsedProduct, RawSourceRecord
 
 
+def extract_flipkart_specs(
+    sel: Selector,
+) -> tuple[dict[str, str], dict[str, dict[str, str]]]:
+    """Extract flat specs dictionary and section-organized specs hierarchy from Flipkart HTML."""
+    specs: dict[str, str] = {}
+    sections: dict[str, dict[str, str]] = {}
+
+    # 1. Modern React Web Grid Sections (.grid-formation or section containers)
+    section_blocks = sel.css(
+        "div.grid-formation.grid-column-1, div.grid-formation, "
+        "div._1psv1ze4i._1psv1ze29, div.r-1udh08x div.grid-formation"
+    )
+    for block in section_blocks:
+        heading_el = (
+            block.css("div[font='default-fk-font-l']::text").get()
+            or block.css("div.v1zwn21n.v1zwn24::text").get()
+            or block.css("div.v1zwn24::text").get()
+        )
+        section_name = heading_el.strip() if heading_el else "General"
+        section_specs: dict[str, str] = {}
+
+        for item in block.css("div.grid-formation-dynamic"):
+            key_el = (
+                item.css("div.v1zwn21o.v1zwn28::text").get()
+                or item.css("div.v1zwn28::text").get()
+                or item.css("div[font='default-fk-font-m']::text").get()
+                or item.xpath(".//div[contains(@class, 'v1zwn21o')]/text()").get()
+            )
+            val_el = (
+                item.css("div.v1zwn21n.v1zwn27::text").get()
+                or item.css("div.v1zwn21n.v1zwn26::text").get()
+                or item.css("div.v1zwn27::text").get()
+                or item.css("div.v1zwn26::text").get()
+                or item.css("div[font='s']::text").get()
+                or item.xpath(
+                    ".//div[contains(@class, 'v1zwn21n') or contains(@class, 'v1zwn27')]/text()"
+                ).get()
+            )
+            if key_el and val_el:
+                k_clean = normalize_text(key_el)
+                v_clean = val_el.strip()
+                specs[k_clean] = v_clean
+                section_specs[key_el.strip()] = v_clean
+
+        if section_specs:
+            sections[section_name] = section_specs
+
+    # 2. Standalone .grid-formation-dynamic elements (if any missed)
+    for item in sel.css("div.grid-formation-dynamic"):
+        key_el = (
+            item.css("div.v1zwn21o.v1zwn28::text").get()
+            or item.css("div.v1zwn28::text").get()
+            or item.css("div[font='default-fk-font-m']::text").get()
+            or item.xpath(".//div[contains(@class, 'v1zwn21o')]/text()").get()
+        )
+        val_el = (
+            item.css("div.v1zwn21n.v1zwn27::text").get()
+            or item.css("div.v1zwn21n.v1zwn26::text").get()
+            or item.css("div.v1zwn27::text").get()
+            or item.css("div.v1zwn26::text").get()
+            or item.css("div[font='s']::text").get()
+            or item.xpath(
+                ".//div[contains(@class, 'v1zwn21n') or contains(@class, 'v1zwn27')]/text()"
+            ).get()
+        )
+        if key_el and val_el:
+            k_clean = normalize_text(key_el)
+            if k_clean not in specs:
+                specs[k_clean] = val_el.strip()
+
+    # 3. Warranty tab items
+    warranty_headings = sel.xpath(
+        ".//div[contains(@class, 'v1zwn24') and not(contains(@class, 'v1zwn21n'))]"
+    )
+    for head in warranty_headings:
+        head_text = head.xpath("./text()").get()
+        val_text = head.xpath("following-sibling::div[contains(@class, 'v1zwn26')][1]/text()").get()
+        if head_text and val_text:
+            k_clean = normalize_text(head_text)
+            if k_clean not in specs:
+                specs[k_clean] = val_text.strip()
+            sections.setdefault("Warranty", {})[head_text.strip()] = val_text.strip()
+
+    # 4. Manufacturer info items
+    mfg_items = sel.xpath(
+        ".//div[contains(@class, '_1psv1zeb9') and contains(@class, '_1psv1ze0') "
+        "and .//div[contains(@class, 'v1zwn21o')] and .//div[contains(@class, 'v1zwn21n')]]"
+    )
+    for mfg in mfg_items:
+        k = mfg.xpath(".//div[contains(@class, 'v1zwn21o')]/text()").get()
+        v = mfg.xpath(".//div[contains(@class, 'v1zwn21n')]/text()").get()
+        if k and v:
+            k_clean = normalize_text(k)
+            if k_clean not in specs:
+                specs[k_clean] = v.strip()
+            sections.setdefault("Manufacturer Info", {})[k.strip()] = v.strip()
+
+    # 5. Legacy Flipkart table extraction (table._14cfVK, tr._1s_Smc, tr.row)
+    for row in sel.css("tr._1s_Smc, tr.row, div._14cfVK tr"):
+        key_el = row.css("td._1hKmda::text, td:first-child::text").get()
+        val_el = row.css("td._21lJal li::text, td._21lJal::text, td:last-child::text").get()
+        if key_el and val_el:
+            k_clean = normalize_text(key_el)
+            if k_clean not in specs:
+                specs[k_clean] = val_el.strip()
+
+    # 6. Bullet points in description (_21Ahn-, _2418kt)
+    for li in sel.css("li._21Ahn-::text, div._2418kt li::text").getall():
+        if ":" in li:
+            k, v = li.split(":", 1)
+            k_clean = normalize_text(k)
+            if k_clean not in specs:
+                specs[k_clean] = v.strip()
+
+    return specs, sections
+
+
 def parse_flipkart_payload(
     payload: dict[str, object],
     source_url: AnyHttpUrl,
@@ -175,24 +292,23 @@ def parse_flipkart_payload(
 
     # Specs table extraction
     specs: dict[str, str] = {}
+    sections: dict[str, dict[str, str]] = {}
     if sel:
-        for row in sel.css("tr._1s_Smc, tr.row, div._14cfVK tr"):
-            key_el = row.css("td._1hKmda::text, td:first-child::text").get()
-            val_el = row.css("td._21lJal li::text, td._21lJal::text, td:last-child::text").get()
-            if key_el and val_el:
-                specs[normalize_text(key_el)] = val_el.strip()
-
-        # Also bullet points in description
-        for li in sel.css("li._21Ahn-::text, div._2418kt li::text").getall():
-            if ":" in li:
-                k, v = li.split(":", 1)
-                specs[normalize_text(k)] = v.strip()
+        specs, sections = extract_flipkart_specs(sel)
 
     # Brand and Model
     brand = infer_brand(title, specs.get("brand") or specs.get("model brand"))
-    model_name = specs.get("model name") or specs.get("model") or specs.get("series") or title
+    model_name = (
+        specs.get("model name")
+        or specs.get("model")
+        or specs.get("series")
+        or specs.get("model number")
+        or title
+    )
 
     attributes = build_category_attributes(category, title, specs)
+    if sections:
+        attributes["spec_sections"] = json.dumps(sections)
 
     return ParsedProduct(
         source="flipkart",
