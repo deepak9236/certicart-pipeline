@@ -15,6 +15,7 @@ from sources.common import (
     build_category_attributes,
     extract_digits_to_paise,
     infer_brand,
+    is_ignored_spec_key,
 )
 from sources.contracts import ParsedProduct, RawSourceRecord
 
@@ -38,6 +39,8 @@ def extract_flipkart_specs(
             or block.css("div.v1zwn24::text").get()
         )
         section_name = heading_el.strip() if heading_el else "General"
+        if is_ignored_spec_key(section_name):
+            continue
         section_specs: dict[str, str] = {}
 
         for item in block.css("div.grid-formation-dynamic"):
@@ -58,15 +61,18 @@ def extract_flipkart_specs(
                 ).get()
             )
             if key_el and val_el:
-                k_clean = normalize_text(key_el)
-                v_clean = val_el.strip()
-                specs[k_clean] = v_clean
-                section_specs[key_el.strip()] = v_clean
+                key_clean = key_el.strip()
+                val_clean = val_el.strip()
+                if not key_clean or not val_clean or is_ignored_spec_key(key_clean):
+                    continue
+                k_clean = normalize_text(key_clean)
+                specs[k_clean] = val_clean
+                section_specs[key_clean] = val_clean
 
         if section_specs:
             sections[section_name] = section_specs
 
-    # 2. Standalone .grid-formation-dynamic elements (if any missed)
+    # 2. Standalone .grid-formation-dynamic elements (if inside spec sections)
     for item in sel.css("div.grid-formation-dynamic"):
         key_el = (
             item.css("div.v1zwn21o.v1zwn28::text").get()
@@ -85,9 +91,13 @@ def extract_flipkart_specs(
             ).get()
         )
         if key_el and val_el:
-            k_clean = normalize_text(key_el)
+            key_clean = key_el.strip()
+            val_clean = val_el.strip()
+            if not key_clean or not val_clean or is_ignored_spec_key(key_clean):
+                continue
+            k_clean = normalize_text(key_clean)
             if k_clean not in specs:
-                specs[k_clean] = val_el.strip()
+                specs[k_clean] = val_clean
 
     # 3. Warranty tab items
     warranty_headings = sel.xpath(
@@ -97,41 +107,97 @@ def extract_flipkart_specs(
         head_text = head.xpath("./text()").get()
         val_text = head.xpath("following-sibling::div[contains(@class, 'v1zwn26')][1]/text()").get()
         if head_text and val_text:
-            k_clean = normalize_text(head_text)
+            key_clean = head_text.strip()
+            val_clean = val_text.strip()
+            if not key_clean or not val_clean or is_ignored_spec_key(key_clean):
+                continue
+            k_clean = normalize_text(key_clean)
             if k_clean not in specs:
-                specs[k_clean] = val_text.strip()
-            sections.setdefault("Warranty", {})[head_text.strip()] = val_text.strip()
+                specs[k_clean] = val_clean
+            sections.setdefault("Warranty", {})[key_clean] = val_clean
 
-    # 4. Manufacturer info items
-    mfg_items = sel.xpath(
-        ".//div[contains(@class, '_1psv1zeb9') and contains(@class, '_1psv1ze0') "
-        "and .//div[contains(@class, 'v1zwn21o')] and .//div[contains(@class, 'v1zwn21n')]]"
+    # 4. Manufacturer info items (direct child divs)
+    mfg_xpath = (
+        ".//div[contains(@class, '_1psv1zeb9') and "
+        "./div[contains(@class, 'v1zwn21o')] and "
+        "./div[contains(@class, 'v1zwn21n')]]"
     )
-    for mfg in mfg_items:
-        k = mfg.xpath(".//div[contains(@class, 'v1zwn21o')]/text()").get()
-        v = mfg.xpath(".//div[contains(@class, 'v1zwn21n')]/text()").get()
+    for mfg in sel.xpath(mfg_xpath):
+        k = mfg.xpath("./div[contains(@class, 'v1zwn21o')]/text()").get()
+        v = mfg.xpath("./div[contains(@class, 'v1zwn21n')]/text()").get()
         if k and v:
-            k_clean = normalize_text(k)
+            key_clean = k.strip()
+            val_clean = v.strip()
+            if not key_clean or not val_clean or is_ignored_spec_key(key_clean):
+                continue
+            k_clean = normalize_text(key_clean)
             if k_clean not in specs:
-                specs[k_clean] = v.strip()
-            sections.setdefault("Manufacturer Info", {})[k.strip()] = v.strip()
+                specs[k_clean] = val_clean
+            sections.setdefault("Manufacturer Info", {})[key_clean] = val_clean
 
     # 5. Legacy Flipkart table extraction (table._14cfVK, tr._1s_Smc, tr.row)
     for row in sel.css("tr._1s_Smc, tr.row, div._14cfVK tr"):
         key_el = row.css("td._1hKmda::text, td:first-child::text").get()
         val_el = row.css("td._21lJal li::text, td._21lJal::text, td:last-child::text").get()
         if key_el and val_el:
-            k_clean = normalize_text(key_el)
+            key_clean = key_el.strip()
+            val_clean = val_el.strip()
+            if not key_clean or not val_clean or is_ignored_spec_key(key_clean):
+                continue
+            k_clean = normalize_text(key_clean)
             if k_clean not in specs:
-                specs[k_clean] = val_el.strip()
+                specs[k_clean] = val_clean
 
-    # 6. Bullet points in description (_21Ahn-, _2418kt)
+    # 5. Bullet points in description (_21Ahn-, _2418kt)
     for li in sel.css("li._21Ahn-::text, div._2418kt li::text").getall():
-        if ":" in li:
-            k, v = li.split(":", 1)
-            k_clean = normalize_text(k)
+        li_clean = li.strip()
+        if not li_clean or is_ignored_spec_key(li_clean):
+            continue
+        if ":" in li_clean:
+            k, v = li_clean.split(":", 1)
+            key_clean = k.strip()
+            val_clean = v.strip()
+            if not key_clean or not val_clean or is_ignored_spec_key(key_clean):
+                continue
+            k_clean = normalize_text(key_clean)
             if k_clean not in specs:
-                specs[k_clean] = v.strip()
+                specs[k_clean] = val_clean
+        else:
+            li_lower = li_clean.casefold()
+            if (
+                "ram" in li_lower or "rom" in li_lower or "storage" in li_lower
+            ) and "memory" not in specs:
+                specs["memory"] = li_clean
+            elif (
+                "display" in li_lower
+                or "screen" in li_lower
+                or "inch" in li_lower
+                or "cm (" in li_lower
+            ) and "display" not in specs:
+                specs["display"] = li_clean
+            elif ("camera" in li_lower or "mp " in li_lower) and "camera" not in specs:
+                specs["camera"] = li_clean
+            elif ("battery" in li_lower or "mah" in li_lower) and "battery" not in specs:
+                specs["battery"] = li_clean
+            elif (
+                any(
+                    p in li_lower
+                    for p in (
+                        "processor",
+                        "snapdragon",
+                        "dimensity",
+                        "helio",
+                        "bionic",
+                        "unisoc",
+                        "octa core",
+                        "quad core",
+                    )
+                )
+                and "processor" not in specs
+            ):
+                specs["processor"] = li_clean
+            elif "warranty" in li_lower and "warranty" not in specs:
+                specs["warranty"] = li_clean
 
     return specs, sections
 
@@ -189,7 +255,7 @@ def parse_flipkart_payload(
     # Clean title stop-phrases
     if title:
         title = re.sub(
-            r"\s*(?:online\s+at\s+best\s+price\s+(?:on|in)\s+[^.]+|\(includes\s+extra\s+discount[^)]*\))\s*$",
+            r"\s*(?:online\s+at\s+best\s+price\s+(?:on|in)\s+flipkart(?:\.com)?|online\s+at\s+best\s+price.*|\(includes\s+extra\s+discount[^)]*\))\s*$",
             "",
             title,
             flags=re.IGNORECASE,

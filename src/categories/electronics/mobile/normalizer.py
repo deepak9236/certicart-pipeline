@@ -259,18 +259,56 @@ class MobileIdentityNormalizer:
     ) -> float | None:
         title_lower = title.casefold()
         # Look for e.g. 6.9in, 6.72", 6.1″, 6.5-inch
-        m = re.search(r"\b([2-7](?:\.[0-9]{1,2})?)\s*(?:in|inch|inches|\"|″|-inch)\b", title_lower)
+        m = re.search(r"([2-7](?:\.[0-9]{1,2})?)\s*(?:in|inch|inches|\"|″|-inch)", title_lower)
         if m:
             with contextlib.suppress(ValueError):
                 return float(m.group(1))
 
+        cm_t = re.search(r"(\d{1,2}(?:\.\d{1,2})?)\s*cm", title_lower)
+        if cm_t:
+            with contextlib.suppress(ValueError):
+                cm_f = float(cm_t.group(1))
+                val = round(cm_f / 2.54, 2)
+                if 1.5 <= val <= 8.5:
+                    return val
+
         if specs:
-            for k in ("screen size", "display size", "display size (in inches)"):
+            for k in (
+                "screen size in inches",
+                "screen size (in inches)",
+                "display size (in inches)",
+                "screen size",
+                "display size",
+                "screen size in cm",
+                "display size in cm",
+            ):
                 if k in specs:
-                    m = re.search(r"([2-7](?:\.[0-9]{1,2})?)", specs[k])
-                    if m:
+                    sc_raw = specs[k]
+                    inch_m = re.search(
+                        r"(\d+(?:\.\d+)?)\s*(?:in|inch|inches|\"|″|-inch)", sc_raw, re.IGNORECASE
+                    )
+                    if inch_m:
                         with contextlib.suppress(ValueError):
-                            return float(m.group(1))
+                            val = float(inch_m.group(1))
+                            if 1.5 <= val <= 8.5:
+                                return val
+                    cm_m = re.search(r"(\d+(?:\.\d+)?)\s*cm", sc_raw, re.IGNORECASE)
+                    if cm_m:
+                        with contextlib.suppress(ValueError):
+                            cm_val = float(cm_m.group(1))
+                            val = round(cm_val / 2.54, 2)
+                            if 1.5 <= val <= 8.5:
+                                return val
+                    num_m = re.search(r"^(\d+(?:\.\d+)?)$", sc_raw.strip())
+                    if num_m:
+                        with contextlib.suppress(ValueError):
+                            val = float(num_m.group(1))
+                            if 1.5 <= val <= 8.5:
+                                return val
+                            elif val > 8.5:
+                                val_cm = round(val / 2.54, 2)
+                                if 1.5 <= val_cm <= 8.5:
+                                    return val_cm
         return None
 
     @classmethod
@@ -475,12 +513,63 @@ class MobileIdentityNormalizer:
             else None
         )
 
-        if extra_attributes and "ram_gb" in extra_attributes:
-            with contextlib.suppress(ValueError):
-                ram_gb = int(str(extra_attributes["ram_gb"]))
-        if extra_attributes and "storage_gb" in extra_attributes:
-            with contextlib.suppress(ValueError):
-                storage_gb = int(str(extra_attributes["storage_gb"]))
+        if extra_attributes:
+            if "ram_gb" in extra_attributes:
+                with contextlib.suppress(ValueError):
+                    ram_gb = int(str(extra_attributes["ram_gb"]))
+            if "storage_gb" in extra_attributes:
+                with contextlib.suppress(ValueError):
+                    storage_gb = int(str(extra_attributes["storage_gb"]))
+            if (
+                "screen_size_inches" in extra_attributes
+                and extra_attributes["screen_size_inches"] is not None
+            ):
+                with contextlib.suppress(ValueError):
+                    screen_size = float(str(extra_attributes["screen_size_inches"]))
+            if extra_attributes.get("chipset"):
+                chipset = str(extra_attributes["chipset"])
+            if extra_attributes.get("color"):
+                color = str(extra_attributes["color"])
+            if extra_attributes.get("network_type"):
+                network_type = str(extra_attributes["network_type"])
+            if extra_attributes.get("display_type"):
+                display_type = str(extra_attributes["display_type"])
+            if (
+                "refresh_rate_hz" in extra_attributes
+                and extra_attributes["refresh_rate_hz"] is not None
+            ):
+                with contextlib.suppress(ValueError):
+                    refresh_rate = int(str(extra_attributes["refresh_rate_hz"]))
+            if (
+                "primary_camera_mp" in extra_attributes
+                and extra_attributes["primary_camera_mp"] is not None
+            ):
+                with contextlib.suppress(ValueError):
+                    primary_camera = int(str(extra_attributes["primary_camera_mp"]))
+            if "battery_mah" in extra_attributes and extra_attributes["battery_mah"] is not None:
+                with contextlib.suppress(ValueError):
+                    battery = int(str(extra_attributes["battery_mah"]))
+            if (
+                "fast_charging_w" in extra_attributes
+                and extra_attributes["fast_charging_w"] is not None
+            ):
+                with contextlib.suppress(ValueError):
+                    charging = int(str(extra_attributes["fast_charging_w"]))
+            if extra_attributes.get("operating_system"):
+                os_name = str(extra_attributes["operating_system"])
+            if extra_attributes.get("resolution_standard"):
+                resolution = str(extra_attributes["resolution_standard"])
+            if extra_attributes.get("camera_setup"):
+                camera_setup = str(extra_attributes["camera_setup"])
+            if extra_attributes.get("water_resistance_rating"):
+                water_resistance = str(extra_attributes["water_resistance_rating"]).upper()
+            if extra_attributes.get("screen_protection"):
+                screen_protection = str(extra_attributes["screen_protection"])
+            if (
+                "ois_supported" in extra_attributes
+                and extra_attributes["ois_supported"] is not None
+            ):
+                ois_supported = bool(extra_attributes["ois_supported"])
 
         # Build clean model name: [Brand] [Family/Model] [Storage] [Color]
         parts = [brand.capitalize()]
@@ -541,6 +630,106 @@ class MobileIdentityNormalizer:
         ):
             extra.pop(explicit_k, None)
 
+        front_camera_val: int | None = None
+        if (
+            extra_attributes
+            and "front_camera_mp" in extra_attributes
+            and extra_attributes["front_camera_mp"] is not None
+        ):
+            with contextlib.suppress(ValueError):
+                front_camera_val = int(str(extra_attributes["front_camera_mp"]))
+        extra.pop("front_camera_mp", None)
+
+        weight_g_val: float | None = None
+        if (
+            extra_attributes
+            and "weight_grams" in extra_attributes
+            and extra_attributes["weight_grams"] is not None
+        ):
+            with contextlib.suppress(ValueError):
+                weight_g_val = float(str(extra_attributes["weight_grams"]))
+        extra.pop("weight_grams", None)
+
+        biometrics_val = (
+            str(extra_attributes["biometrics"])
+            if (
+                extra_attributes
+                and "biometrics" in extra_attributes
+                and extra_attributes["biometrics"]
+            )
+            else None
+        )
+        extra.pop("biometrics", None)
+
+        audio_jack_val = (
+            bool(extra_attributes["audio_jack_3_5mm"])
+            if (
+                extra_attributes
+                and "audio_jack_3_5mm" in extra_attributes
+                and extra_attributes["audio_jack_3_5mm"] is not None
+            )
+            else None
+        )
+        extra.pop("audio_jack_3_5mm", None)
+
+        nfc_val = (
+            bool(extra_attributes["nfc_supported"])
+            if (
+                extra_attributes
+                and "nfc_supported" in extra_attributes
+                and extra_attributes["nfc_supported"] is not None
+            )
+            else None
+        )
+        extra.pop("nfc_supported", None)
+
+        sim_type_val = (
+            str(extra_attributes["sim_type"])
+            if (
+                extra_attributes and "sim_type" in extra_attributes and extra_attributes["sim_type"]
+            )
+            else None
+        )
+        extra.pop("sim_type", None)
+
+        model_num_val = (
+            str(extra_attributes["model_number"])
+            if (
+                extra_attributes
+                and "model_number" in extra_attributes
+                and extra_attributes["model_number"]
+            )
+            else None
+        )
+        extra.pop("model_number", None)
+
+        asin_val = (
+            str(extra_attributes["asin"])
+            if (extra_attributes and "asin" in extra_attributes and extra_attributes["asin"])
+            else None
+        )
+        extra.pop("asin", None)
+
+        warranty_val = (
+            str(extra_attributes["warranty"])
+            if (
+                extra_attributes and "warranty" in extra_attributes and extra_attributes["warranty"]
+            )
+            else None
+        )
+        extra.pop("warranty", None)
+
+        final_mpn = manufacturer_part_number or (
+            str(extra_attributes["mpn"])
+            if (extra_attributes and "mpn" in extra_attributes)
+            else None
+        )
+        final_gtin = gtin or (
+            str(extra_attributes["gtin"])
+            if (extra_attributes and "gtin" in extra_attributes)
+            else None
+        )
+
         mobile_schema = MobileAttributes(
             ram_gb=ram_gb,
             storage_gb=storage_gb,
@@ -551,6 +740,7 @@ class MobileIdentityNormalizer:
             display_type=display_type,
             refresh_rate_hz=refresh_rate,
             primary_camera_mp=primary_camera,
+            front_camera_mp=front_camera_val,
             battery_mah=battery,
             fast_charging_w=charging,
             operating_system=os_name,
@@ -559,8 +749,16 @@ class MobileIdentityNormalizer:
             water_resistance_rating=water_resistance,
             screen_protection=screen_protection,
             ois_supported=ois_supported,
-            mpn=manufacturer_part_number,
-            gtin=gtin,
+            biometrics=biometrics_val,
+            audio_jack_3_5mm=audio_jack_val,
+            nfc_supported=nfc_val,
+            weight_grams=weight_g_val,
+            sim_type=sim_type_val,
+            model_number=model_num_val,
+            mpn=final_mpn,
+            gtin=final_gtin,
+            asin=asin_val,
+            warranty=warranty_val,
             **extra,
         )
         attributes = mobile_schema.to_attribute_dict()

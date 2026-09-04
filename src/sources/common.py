@@ -59,14 +59,33 @@ IGNORED_SPEC_KEYS: frozenset[str] = frozenset(
         "spec_brand_url",
         "brand_url_pdp",
         "spec_viewmore_btn",
+        "flipkart",
+        "minutes",
+        "grocery",
+        "travel",
+        "supercoin",
+        "explore plus",
+        "delivery details",
+        "similar products",
+        "trending products",
+        "location not set",
+        "name and address of the manufacturer",
+        "name and address of the packer",
+        "name and address of the importer",
     }
 )
 
 
 def is_ignored_spec_key(key: str) -> bool:
-    """Check if specification key represents retailer contact/legal noise."""
+    """Check if specification key represents retailer contact/legal/promo noise."""
     k = normalize_text(key)
+    if not k or len(k) < 2 or len(k) > 60:
+        return True
     if k in IGNORED_SPEC_KEYS:
+        return True
+    if any(c in k for c in ("₹", "$", "\u20b9")):
+        return True
+    if re.match(r"^[\d,./_+-]+$", k):
         return True
     noise_patterns = (
         "customer support",
@@ -79,6 +98,20 @@ def is_ignored_spec_key(key: str) -> bool:
         "toll free",
         "installation & demo",
         "contact person",
+        "delivery details",
+        "similar products",
+        "trending products",
+        "location not set",
+        "explore plus",
+        "supercoin",
+        "about us",
+        "careers",
+        "press",
+        "stories",
+        "help center",
+        "corporate information",
+        "mail us",
+        "registered office",
     )
     return any(pattern in k for pattern in noise_patterns)
 
@@ -558,47 +591,519 @@ def build_category_attributes(
 
     # Mobile category extraction
     elif category.casefold() in ("mobile", "smartphone", "phone"):
-        for ram_key in ("ram", "ram capacity", "internal memory"):
+        title_lower = title.casefold()
+
+        # 1. RAM Extraction
+        for ram_key in (
+            "ram",
+            "ram capacity",
+            "internal memory",
+            "ram memory installed size",
+            "system memory",
+            "installed ram",
+            "system ram type",
+        ):
             if ram_key in norm_specs:
                 with contextlib.suppress(ValueError):
                     attributes["ram_gb"] = normalize_capacity_gb(
                         clean_capacity_str(norm_specs[ram_key])
                     )
                     break
-        for st_key in ("storage", "internal storage", "rom", "storage capacity"):
+        if "ram_gb" not in attributes:
+            ram_match = re.search(r"\b([23468]|12|16|24)\s*gb(?:\s+ram)?\b", title_lower)
+            if ram_match:
+                with contextlib.suppress(ValueError):
+                    attributes["ram_gb"] = int(ram_match.group(1))
+
+        # 2. Storage Extraction
+        for st_key in (
+            "internal storage",
+            "storage",
+            "rom",
+            "storage capacity",
+            "memory storage capacity",
+            "capacity",
+        ):
             if st_key in norm_specs:
                 with contextlib.suppress(ValueError):
                     attributes["storage_gb"] = normalize_capacity_gb(
                         clean_capacity_str(norm_specs[st_key])
                     )
                     break
-        for proc_key in ("processor", "processor type", "chipset", "processor name"):
-            if proc_key in norm_specs:
-                attributes["chipset"] = norm_specs[proc_key].strip()
+        if "storage_gb" not in attributes:
+            if "1tb" in title_lower or "1 tb" in title_lower:
+                attributes["storage_gb"] = 1024
+            else:
+                st_match = re.search(
+                    r"\b(32|64|128|256|512)\s*gb(?:\s+(?:rom|storage|internal\s+storage))?\b",
+                    title_lower,
+                )
+                if st_match:
+                    with contextlib.suppress(ValueError):
+                        attributes["storage_gb"] = int(st_match.group(1))
+
+        # 3. Chipset / Processor Extraction
+        p_brand = norm_specs.get("processor brand", "").strip()
+        if p_brand.lower() in ("not available", "na", "null", "none"):
+            p_brand = ""
+        p_name = (
+            norm_specs.get("processor name")
+            or norm_specs.get("processor type")
+            or norm_specs.get("processor")
+            or norm_specs.get("chipset")
+            or norm_specs.get("cpu model")
+            or ""
+        ).strip()
+        if p_name.lower() in ("not available", "na", "null", "none"):
+            p_name = norm_specs.get("processor", "").strip()
+            if p_name.lower() in ("not available", "na", "null", "none"):
+                p_name = ""
+
+        if p_name:
+            full_proc = (
+                f"{p_brand} {p_name}".strip()
+                if (p_brand and p_brand.lower() not in p_name.lower())
+                else p_name
+            )
+            full_proc = re.sub(
+                r"\b(?:processor|octa-core|octa core|quad-core|quad core|"
+                r"dual-core|dual core|[\d.]+\s*ghz)\b",
+                "",
+                full_proc,
+                flags=re.IGNORECASE,
+            ).strip()
+            full_proc = re.sub(r",\s*$", "", full_proc).strip()
+            full_proc = re.sub(r"\s+", " ", full_proc)
+            if full_proc and full_proc.lower() not in ("not available", "na"):
+                attributes["chipset"] = full_proc
+        if "chipset" not in attributes:
+            apple_a = re.search(r"\b(a1[4-9](?:\s+pro)?(?:\s+bionic)?(?:\s+chip)?)\b", title_lower)
+            if apple_a:
+                attributes["chipset"] = re.sub(
+                    r"\s+chip$", "", apple_a.group(1).title(), flags=re.IGNORECASE
+                ).strip()
+            else:
+                chip_m = re.search(
+                    r"\b(Snapdragon\s+(?:8\s+Gen\s+[1-5]|7\s+Gen\s+[1-4]|6s?\s+Gen\s+\d|4\s+Gen\s+\d|8[5-8]\d|7\d{2}[a-z]?|\d{3,4})|Dimensity\s+(?:9\d{3}|8\d{3}|7\d{3}|6\d{3}|[1-9]\d{2}[a-z]?)|Tensor\s+G[1-5]|Unisoc\s+(?:T\d{3,4}|\w+)|Helio\s+[A-Z]\d{2,3})\b",
+                    title,
+                    re.IGNORECASE,
+                )
+                if chip_m:
+                    attributes["chipset"] = chip_m.group(1).strip()
+
+        # 4. Color
+        for col_key in ("brand color", "color", "colour"):
+            if col_key in norm_specs:
+                attributes["color"] = norm_specs[col_key].strip()
                 break
-        if "color" in norm_specs:
-            attributes["color"] = norm_specs["color"].strip()
-        if "battery capacity" in norm_specs or "battery" in norm_specs:
-            b_text = norm_specs.get("battery capacity") or norm_specs.get("battery", "")
-            b_m = re.search(r"(\d{3,5})\s*mah", b_text.lower())
-            if b_m:
-                with contextlib.suppress(ValueError):
-                    attributes["battery_mah"] = int(b_m.group(1))
-        for cam_key in ("primary camera", "rear camera", "main camera"):
-            if cam_key in norm_specs:
-                c_m = re.search(r"(\d{1,3})\s*mp", norm_specs[cam_key].lower())
-                if c_m:
-                    with contextlib.suppress(ValueError):
-                        attributes["primary_camera_mp"] = int(c_m.group(1))
-                        break
-        for sc_key in ("screen size", "display size"):
+        if "color" not in attributes:
+            colors = (
+                "desert titanium",
+                "natural titanium",
+                "white titanium",
+                "black titanium",
+                "titanium gray",
+                "titanium black",
+                "phantom black",
+                "marble gray",
+                "cobalt violet",
+                "amber yellow",
+                "onyx black",
+                "obsidian",
+                "porcelain",
+                "hazel",
+                "bay",
+                "rose",
+                "midnight",
+                "starlight",
+                "space black",
+                "space gray",
+                "emerald green",
+                "silver",
+                "gold",
+                "black",
+                "blue",
+                "green",
+                "purple",
+                "pink",
+                "white",
+                "yellow",
+            )
+            for c in colors:
+                if re.search(rf"\b{re.escape(c)}\b", title_lower):
+                    attributes["color"] = c.title()
+                    break
+
+        # 5. Network Type
+        for net_key in (
+            "cellular technology",
+            "network type",
+            "supported networks",
+            "network connectivity",
+        ):
+            if net_key in norm_specs:
+                net_val = norm_specs[net_key].upper()
+                if "5G" in net_val:
+                    attributes["network_type"] = "5G"
+                    break
+                elif "4G" in net_val or "LTE" in net_val:
+                    attributes["network_type"] = "4G"
+                    break
+        if "network_type" not in attributes:
+            attributes["network_type"] = "5G" if "5g" in title_lower else "4G"
+
+        # 6. Screen Size (Inches)
+        for sc_key in (
+            "screen size in inches",
+            "screen size (in inches)",
+            "display size (in inches)",
+            "display size",
+            "screen size",
+            "screen size in cm",
+            "display size in cm",
+        ):
             if sc_key in norm_specs:
-                sc_m = re.search(r"(\d+(?:\.\d+)?)", norm_specs[sc_key])
-                if sc_m:
+                sc_raw = norm_specs[sc_key]
+                inch_m = re.search(
+                    r"(\d+(?:\.\d+)?)\s*(?:in|inch|inches|\"|″|-inch)", sc_raw, re.IGNORECASE
+                )
+                if inch_m:
                     with contextlib.suppress(ValueError):
-                        val = float(sc_m.group(1))
+                        val = float(inch_m.group(1))
                         if 1.5 <= val <= 8.5:
                             attributes["screen_size_inches"] = val
                             break
+                # Check for cm pattern
+                cm_m = re.search(r"(\d+(?:\.\d+)?)\s*cm", sc_raw, re.IGNORECASE)
+                if cm_m:
+                    with contextlib.suppress(ValueError):
+                        cm_val = float(cm_m.group(1))
+                        val = round(cm_val / 2.54, 2)
+                        if 1.5 <= val <= 8.5:
+                            attributes["screen_size_inches"] = val
+                            break
+                num_m = re.search(r"^(\d+(?:\.\d+)?)$", sc_raw.strip())
+                if num_m:
+                    with contextlib.suppress(ValueError):
+                        val = float(num_m.group(1))
+                        if 1.5 <= val <= 8.5:
+                            attributes["screen_size_inches"] = val
+                            break
+                        elif val > 8.5:
+                            val_cm = round(val / 2.54, 2)
+                            if 1.5 <= val_cm <= 8.5:
+                                attributes["screen_size_inches"] = val_cm
+                                break
+        if "screen_size_inches" not in attributes:
+            sc_m = re.search(
+                r"([2-7](?:\.[0-9]{1,2})?)\s*(?:in|inch|inches|\"|″|-inch)", title_lower
+            )
+            if sc_m:
+                with contextlib.suppress(ValueError):
+                    attributes["screen_size_inches"] = float(sc_m.group(1))
+            else:
+                cm_t = re.search(r"(\d{1,2}(?:\.\d{1,2})?)\s*cm", title_lower)
+                if cm_t:
+                    with contextlib.suppress(ValueError):
+                        cm_f = float(cm_t.group(1))
+                        val = round(cm_f / 2.54, 2)
+                        if 1.5 <= val <= 8.5:
+                            attributes["screen_size_inches"] = val
+
+        # 7. Display Type
+        for dt_key in ("display type", "screen type", "resolution type", "panel type"):
+            if dt_key in norm_specs:
+                dt_v = norm_specs[dt_key].lower()
+                if "super amoled" in dt_v:
+                    attributes["display_type"] = "Super AMOLED"
+                    break
+                elif "amoled" in dt_v:
+                    attributes["display_type"] = "AMOLED"
+                    break
+                elif "super retina" in dt_v or "xdr" in dt_v:
+                    attributes["display_type"] = "Super Retina XDR"
+                    break
+                elif "oled" in dt_v:
+                    attributes["display_type"] = "OLED"
+                    break
+                elif "ips" in dt_v:
+                    attributes["display_type"] = "IPS LCD"
+                    break
+                elif "lcd" in dt_v:
+                    attributes["display_type"] = "LCD"
+                    break
+        if "display_type" not in attributes:
+            if "super retina" in title_lower or "xdr" in title_lower:
+                attributes["display_type"] = "Super Retina XDR"
+            elif "amoled" in title_lower:
+                attributes["display_type"] = "AMOLED"
+            elif "oled" in title_lower:
+                attributes["display_type"] = "OLED"
+
+        # 8. Refresh Rate (Hz)
+        for rf_key in ("refresh rate", "standard refresh rate", "display refresh rate"):
+            if rf_key in norm_specs:
+                rf_m = re.search(r"\b(60|90|120|144|165)\b", norm_specs[rf_key])
+                if rf_m:
+                    with contextlib.suppress(ValueError):
+                        attributes["refresh_rate_hz"] = int(rf_m.group(1))
+                        break
+        if "refresh_rate_hz" not in attributes:
+            rf_m = re.search(r"\b(60|90|120|144|165)\s*hz\b", title_lower)
+            if rf_m:
+                with contextlib.suppress(ValueError):
+                    attributes["refresh_rate_hz"] = int(rf_m.group(1))
+
+        # 9. Primary Camera (MP)
+        for cam_key in (
+            "camera",
+            "primary camera",
+            "rear camera",
+            "main camera",
+            "rear camera setup",
+        ):
+            if cam_key in norm_specs:
+                cam_spec_str = norm_specs[cam_key].lower()
+                all_mps = re.findall(r"\b(\d{1,3})\s*(?:mp|megapixel|mega pixel)\b", cam_spec_str)
+                if not all_mps:
+                    all_mps = re.findall(r"\b(200|108|64|50|48|32|13|12|8|5)\b", cam_spec_str)
+                if all_mps:
+                    valid_mps = [int(x) for x in all_mps if 5 <= int(x) <= 200]
+                    if valid_mps:
+                        attributes["primary_camera_mp"] = max(valid_mps)
+                        break
+        if "primary_camera_mp" not in attributes:
+            cam_m = re.search(r"\b(200|108|64|50|48|32|13|12|8|5)\s*mp\b", title_lower)
+            if cam_m:
+                with contextlib.suppress(ValueError):
+                    attributes["primary_camera_mp"] = int(cam_m.group(1))
+
+        # 10. Front Camera (MP)
+        for fcam_key in (
+            "secondary camera",
+            "front camera",
+            "front camera setup",
+            "selfie camera",
+        ):
+            if fcam_key in norm_specs:
+                fcam_spec_str = norm_specs[fcam_key].lower()
+                all_mps = re.findall(r"\b(\d{1,3})\s*(?:mp|megapixel|mega pixel)\b", fcam_spec_str)
+                if not all_mps:
+                    all_mps = re.findall(r"\b(50|32|20|16|13|12|8|5)\b", fcam_spec_str)
+                if all_mps:
+                    valid_mps = [int(x) for x in all_mps if 4 <= int(x) <= 64]
+                    if valid_mps:
+                        attributes["front_camera_mp"] = max(valid_mps)
+                        break
+
+        # 11. Battery (mAh)
+        for b_key in ("battery capacity", "battery", "battery size"):
+            if b_key in norm_specs:
+                b_m = re.search(r"(\d{3,5})\s*mah", norm_specs[b_key].lower())
+                if not b_m:
+                    b_m = re.search(r"\b([1-9][0-9]{3})\b", norm_specs[b_key])
+                if b_m:
+                    with contextlib.suppress(ValueError):
+                        bat_val = int(b_m.group(1))
+                        if 500 <= bat_val <= 15000:
+                            attributes["battery_mah"] = bat_val
+                            break
+        if "battery_mah" not in attributes:
+            b_m = re.search(r"\b([1-9][0-9]{3})\s*mah\b", title_lower)
+            if b_m:
+                with contextlib.suppress(ValueError):
+                    attributes["battery_mah"] = int(b_m.group(1))
+
+        # 12. Fast Charging (Watts)
+        for ch_key in (
+            "additional charging features",
+            "fast charging capability",
+            "quick charging",
+            "charging speed",
+        ):
+            if ch_key in norm_specs:
+                ch_m = re.search(r"(\d{2,3})\s*w", norm_specs[ch_key].lower())
+                if ch_m:
+                    with contextlib.suppress(ValueError):
+                        attributes["fast_charging_w"] = int(ch_m.group(1))
+                        break
+        if "fast_charging_w" not in attributes:
+            ch_m = re.search(
+                r"\b(\d{2,3})\s*w\s*(?:charging|fast|supervooc|hypercharge|turbopower|dart)?\b",
+                title_lower,
+            )
+            if ch_m:
+                with contextlib.suppress(ValueError):
+                    attributes["fast_charging_w"] = int(ch_m.group(1))
+
+        # 13. Operating System
+        for os_key in ("os name & version", "operating system", "os type", "os"):
+            if os_key in norm_specs:
+                attributes["operating_system"] = norm_specs[os_key].strip()
+                break
+        if "operating_system" not in attributes:
+            if "iphone" in title_lower or "apple" in title_lower or "ios" in title_lower:
+                attributes["operating_system"] = "iOS"
+            else:
+                attributes["operating_system"] = "Android"
+
+        # 14. Resolution Standard
+        for res_key in ("resolution", "screen resolution", "resolution type"):
+            if res_key in norm_specs:
+                r_v = norm_specs[res_key].lower()
+                if "4k" in r_v or "3840" in r_v:
+                    attributes["resolution_standard"] = "4K UHD"
+                    break
+                elif "qhd+" in r_v or "2560" in r_v or "3120" in r_v:
+                    attributes["resolution_standard"] = "QHD+"
+                    break
+                elif "1.5k" in r_v or "1220" in r_v or "1272" in r_v:
+                    attributes["resolution_standard"] = "1.5K"
+                    break
+                elif "fhd+" in r_v or "full hd+" in r_v or "2400" in r_v or "1080" in r_v:
+                    attributes["resolution_standard"] = "FHD+"
+                    break
+                elif "hd+" in r_v or "1600" in r_v or "720" in r_v:
+                    attributes["resolution_standard"] = "HD+"
+                    break
+
+        # 15. Camera Setup
+        for csetup_key in (
+            "rear camera configuration",
+            "main camera setup",
+            "dual camera lens",
+            "camera setup",
+        ):
+            if csetup_key in norm_specs:
+                cs_v = norm_specs[csetup_key].lower()
+                if "quad" in cs_v:
+                    attributes["camera_setup"] = "Quad Camera"
+                    break
+                elif "triple" in cs_v:
+                    attributes["camera_setup"] = "Triple Camera"
+                    break
+                elif "dual" in cs_v:
+                    attributes["camera_setup"] = "Dual Camera"
+                    break
+                elif "single" in cs_v:
+                    attributes["camera_setup"] = "Single Camera"
+                    break
+
+        # 16. OIS Supported
+        for ois_key in ("camera features", "primary camera features", "camera"):
+            if ois_key in norm_specs and (
+                "ois" in norm_specs[ois_key].lower()
+                or "optical image" in norm_specs[ois_key].lower()
+            ):
+                attributes["ois_supported"] = True
+                break
+        if "ois_supported" not in attributes and "ois" in title_lower:
+            attributes["ois_supported"] = True
+
+        # 17. Water Resistance / IP Rating
+        for ip_key in ("ip rating", "water resistance", "resistance type"):
+            if ip_key in norm_specs:
+                ip_m = re.search(r"\b(ip6[89]|ip6[57]|ip5[45]|ip53)\b", norm_specs[ip_key].lower())
+                if ip_m:
+                    attributes["water_resistance_rating"] = ip_m.group(1).upper()
+                    break
+        if "water_resistance_rating" not in attributes:
+            ip_m = re.search(r"\b(ip6[89]|ip6[57]|ip5[45]|ip53)\b", title_lower)
+            if ip_m:
+                attributes["water_resistance_rating"] = ip_m.group(1).upper()
+
+        # 18. Screen Protection
+        for prot_key in ("screen protection", "protection", "glass protection"):
+            if prot_key in norm_specs:
+                attributes["screen_protection"] = norm_specs[prot_key].strip()
+                break
+        if "screen_protection" not in attributes:
+            if "ceramic shield" in title_lower or "iphone" in title_lower:
+                attributes["screen_protection"] = "Ceramic Shield"
+            elif "victus 2" in title_lower:
+                attributes["screen_protection"] = "Gorilla Glass Victus 2"
+            elif "victus" in title_lower:
+                attributes["screen_protection"] = "Gorilla Glass Victus"
+
+        # 19. Biometrics
+        for bio_key in ("fingerprint sensor", "security", "lock", "sensors"):
+            if bio_key in norm_specs:
+                b_v = norm_specs[bio_key].lower()
+                if "in-display" in b_v or "in display" in b_v:
+                    attributes["biometrics"] = "In-Display Fingerprint"
+                    break
+                elif "side-mounted" in b_v or "side fingerprint" in b_v:
+                    attributes["biometrics"] = "Side Fingerprint"
+                    break
+                elif "face id" in b_v:
+                    attributes["biometrics"] = "Face ID"
+                    break
+                elif "fingerprint" in b_v:
+                    attributes["biometrics"] = "Fingerprint Sensor"
+                    break
+
+        # 20. Audio Jack (3.5mm)
+        for aj_key in ("audio jack", "audio jack port", "headphone jack"):
+            if aj_key in norm_specs:
+                aj_v = norm_specs[aj_key].lower()
+                if "3.5" in aj_v or "yes" in aj_v:
+                    attributes["audio_jack_3_5mm"] = True
+                elif "no" in aj_v or "type-c" in aj_v or "usb" in aj_v:
+                    attributes["audio_jack_3_5mm"] = False
+                break
+
+        # 21. SIM Type
+        for sim_key in (
+            "sim type",
+            "number of sims supported",
+            "secondary sim type",
+            "dual sim mode",
+        ):
+            if sim_key in norm_specs:
+                attributes["sim_type"] = norm_specs[sim_key].strip()
+                break
+
+        # 22. Weight (Grams)
+        for w_key in ("product weight", "weight", "item weight"):
+            if w_key in norm_specs:
+                w_m = re.search(r"(\d+(?:\.\d+)?)\s*g", norm_specs[w_key].lower())
+                if w_m:
+                    with contextlib.suppress(ValueError):
+                        wt_val = float(w_m.group(1))
+                        if 50.0 <= wt_val <= 600.0:
+                            attributes["weight_grams"] = wt_val
+                            break
+
+        # 23. Identifiers & Part Numbers
+        for mpn_key in (
+            "model number",
+            "item model number",
+            "model series",
+            "part number",
+            "specialsku",
+        ):
+            if mpn_key in norm_specs:
+                attributes["mpn"] = norm_specs[mpn_key].strip()
+                attributes["model_number"] = norm_specs[mpn_key].strip()
+                break
+
+        if "asin" in norm_specs:
+            attributes["asin"] = norm_specs["asin"].strip()
+
+        for gtin_key in ("ean", "gtin", "upc"):
+            if gtin_key in norm_specs:
+                attributes["gtin"] = norm_specs[gtin_key].strip()
+                attributes["ean"] = norm_specs[gtin_key].strip()
+                break
+
+        for w_key in (
+            "warranty summary",
+            "warranty on main product",
+            "warranty description",
+            "warranty",
+        ):
+            if w_key in norm_specs:
+                attributes["warranty"] = norm_specs[w_key].strip()
+                break
 
     return attributes

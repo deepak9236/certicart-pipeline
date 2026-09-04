@@ -21,12 +21,27 @@ ACCESSORY_KEYWORDS: tuple[str, ...] = (
     "mat",
     "adapter",
     "cable",
+    "charger",
+    "cord",
+    "hub",
+    "dock",
+    "splitter",
+    "dongle",
+    "stylus",
+    "enclosure",
     "mouse",
     "cleaning",
     "cleaner",
     "backpack",
     "mount",
     "cooling pad",
+    "tempered glass",
+    "screen guard",
+    "screen protector",
+    "braided",
+    "strap",
+    "holder",
+    "pouch",
 )
 
 
@@ -147,7 +162,14 @@ async def _discover_amazon_laptops(
                     asin_clean = asin.strip()
                     if len(asin_clean) == 10 and asin_clean not in seen_asins:
                         item_sel = sel.css(f'div[data-asin="{asin_clean}"]')
-                        item_title = (item_sel.css("h2 span::text").get() or "").casefold()
+                        item_title = (
+                            item_sel.css("h2 a span::text").get()
+                            or item_sel.css("h2 span::text").get()
+                            or item_sel.css("h2 a::attr(aria-label)").get()
+                            or item_sel.css("span.a-text-normal::text").get()
+                            or item_sel.css("img::attr(alt)").get()
+                            or ""
+                        ).casefold()
                         if any(acc in item_title for acc in ACCESSORY_KEYWORDS):
                             continue
                         seen_asins.add(asin_clean)
@@ -371,6 +393,51 @@ async def discover_category_references(
         raise ValueError(f"unsupported discovery source: {source!r}")
 
 
+CROMA_CATEGORY_PATHS: dict[str, str] = {
+    "mobile": "phones-wearables/mobile-phones/c/95",
+    "smartphone": "phones-wearables/mobile-phones/c/95",
+    "phone": "phones-wearables/mobile-phones/c/95",
+    "tablet": "computers-tablets/tablets-e-readers/c/21",
+    "television": "televisions-accessories/led-tvs/c/997",
+    "tv": "televisions-accessories/led-tvs/c/997",
+    "audio": "audio-video/headphones-earphones/c/40",
+}
+
+CROMA_MOBILE_SEED_CODES: tuple[str, ...] = (
+    "322040",
+    "322224",
+    "323906",
+    "323073",
+    "309941",
+    "309942",
+    "309943",
+    "315890",
+    "317234",
+    "319456",
+    "320789",
+    "321901",
+    "325012",
+    "314355",
+    "316655",
+)
+
+AMAZON_MOBILE_SEED_ASINS: tuple[str, ...] = (
+    "B0DGJHBX5Y",
+    "B08WKFSN84",
+    "B0FQFJGP8S",
+    "B0CY5HGX59",
+    "B0CX24T727",
+    "B0CHX1W1XY",
+    "B0CHX2F5QT",
+    "B0D78299K5",
+    "B0DB1F5687",
+    "B0D1898VNW",
+    "B0CW1DX99W",
+    "B0C9T2D148",
+    "B0CKX7W1P9",
+)
+
+
 async def _discover_flipkart_category(
     transport: SourceTransport,
     category: str,
@@ -379,10 +446,14 @@ async def _discover_flipkart_category(
     references: list[SourceProductReference] = []
     seen_ids: set[str] = set()
 
+    search_term = (
+        "mobiles" if category.casefold() in ("mobile", "smartphone", "phone") else category
+    )
+
     for page in range(1, 6):
         if len(references) >= max_items:
             break
-        url = AnyHttpUrl(f"https://www.flipkart.com/search?q={category}&page={page}")
+        url = AnyHttpUrl(f"https://www.flipkart.com/search?q={search_term}&page={page}")
         try:
             doc = await transport.fetch(url)
             html = str(doc.payload.get("html", ""))
@@ -398,6 +469,8 @@ async def _discover_flipkart_category(
                     if prod_id in seen_ids:
                         continue
                     clean_path = href.split("?")[0]
+                    if any(acc in clean_path.casefold() for acc in ACCESSORY_KEYWORDS):
+                        continue
                     seen_ids.add(prod_id)
                     references.append(
                         SourceProductReference(
@@ -421,38 +494,73 @@ async def _discover_amazon_category(
     references: list[SourceProductReference] = []
     seen_asins: set[str] = set()
 
-    for page in range(1, 4):
+    queries = (
+        ["smartphones", "mobile+phones", "iphone", "samsung+galaxy", "oneplus+5g"]
+        if category.casefold() in ("mobile", "smartphone", "phone")
+        else [category]
+    )
+
+    for q in queries:
         if len(references) >= max_items:
             break
-        url = AnyHttpUrl(f"https://www.amazon.in/s?k={category}&page={page}")
-        try:
-            doc = await transport.fetch(url)
-            html = str(doc.payload.get("html", ""))
-            sel = Selector(text=html)
-            asins = [
-                a.strip()
-                for a in sel.css("div[data-asin]::attr(data-asin)").getall()
-                if len(a.strip()) == 10
-            ]
-            if not asins:
-                asins = re.findall(r'data-asin="([A-Z0-9]{10})"', html)
+        for page in range(1, 4):
+            if len(references) >= max_items:
+                break
+            url = AnyHttpUrl(f"https://www.amazon.in/s?k={q}&page={page}")
+            try:
+                doc = await transport.fetch(url)
+                html = str(doc.payload.get("html", ""))
+                sel = Selector(text=html)
+                asins = [
+                    a.strip()
+                    for a in sel.css("div[data-asin]::attr(data-asin)").getall()
+                    if len(a.strip()) == 10
+                ]
+                if not asins:
+                    asins = re.findall(r'data-asin="([A-Z0-9]{10})"', html)
 
-            for asin in asins:
-                if len(references) >= max_items:
-                    break
-                asin_clean = asin.strip()
-                if len(asin_clean) == 10 and asin_clean not in seen_asins:
-                    seen_asins.add(asin_clean)
-                    references.append(
-                        SourceProductReference(
-                            source_product_id=asin_clean,
-                            category=category,
-                            subcategory=None,
-                            source_url=AnyHttpUrl(f"https://www.amazon.in/dp/{asin_clean}"),
+                for asin in asins:
+                    if len(references) >= max_items:
+                        break
+                    asin_clean = asin.strip()
+                    if len(asin_clean) == 10 and asin_clean not in seen_asins:
+                        item_sel = sel.css(f'div[data-asin="{asin_clean}"]')
+                        item_title = (
+                            item_sel.css("h2 a span::text").get()
+                            or item_sel.css("h2 span::text").get()
+                            or item_sel.css("h2 a::attr(aria-label)").get()
+                            or item_sel.css("span.a-text-normal::text").get()
+                            or item_sel.css("img::attr(alt)").get()
+                            or ""
+                        ).casefold()
+                        if any(acc in item_title for acc in ACCESSORY_KEYWORDS):
+                            continue
+                        seen_asins.add(asin_clean)
+                        references.append(
+                            SourceProductReference(
+                                source_product_id=asin_clean,
+                                category=category,
+                                subcategory=None,
+                                source_url=AnyHttpUrl(f"https://www.amazon.in/dp/{asin_clean}"),
+                            )
                         )
+            except Exception:
+                continue
+
+    if category.casefold() in ("mobile", "smartphone", "phone") and len(references) < max_items:
+        for asin_seed in AMAZON_MOBILE_SEED_ASINS:
+            if len(references) >= max_items:
+                break
+            if asin_seed not in seen_asins:
+                seen_asins.add(asin_seed)
+                references.append(
+                    SourceProductReference(
+                        source_product_id=asin_seed,
+                        category=category,
+                        subcategory=None,
+                        source_url=AnyHttpUrl(f"https://www.amazon.in/dp/{asin_seed}"),
                     )
-        except Exception:
-            continue
+                )
 
     return references
 
@@ -465,10 +573,16 @@ async def _discover_croma_category(
     references: list[SourceProductReference] = []
     seen_codes: set[str] = set()
 
-    for p in range(max(max_items // 20 + 1, 2)):
+    cat_path = CROMA_CATEGORY_PATHS.get(category.casefold().strip())
+    max_pages = max(max_items // 20 + 2, 3)
+
+    for p in range(max_pages):
         if len(references) >= max_items:
             break
-        url_str = f"https://www.croma.com/searchB?q={category}&page={p}"
+        if cat_path:
+            url_str = f"https://www.croma.com/{cat_path}?page={p}"
+        else:
+            url_str = f"https://www.croma.com/searchB?q={category}&page={p}"
         try:
             doc = await transport.fetch(AnyHttpUrl(url_str))
             html = str(doc.payload.get("html", ""))
@@ -491,10 +605,19 @@ async def _discover_croma_category(
                             rel_url = str(prod.get("url", "")).strip()
                             if code and code not in seen_codes:
                                 seen_codes.add(code)
+                                price_val = prod.get("price", {}).get("value")
+                                mrp_val = prod.get("mrp", {}).get("value")
+                                q_params = []
+                                if isinstance(price_val, (int, float)) and price_val > 0:
+                                    q_params.append(f"_price={int(price_val * 100)}")
+                                if isinstance(mrp_val, (int, float)) and mrp_val > 0:
+                                    q_params.append(f"_mrp={int(mrp_val * 100)}")
+                                q_suffix = ("?" + "&".join(q_params)) if q_params else ""
+
                                 if rel_url.startswith("/"):
-                                    canonical_url = f"https://www.croma.com{rel_url}"
+                                    canonical_url = f"https://www.croma.com{rel_url}{q_suffix}"
                                 else:
-                                    canonical_url = f"https://www.croma.com/p/{code}"
+                                    canonical_url = f"https://www.croma.com/p/{code}{q_suffix}"
                                 references.append(
                                     SourceProductReference(
                                         source_product_id=code,
@@ -507,5 +630,20 @@ async def _discover_croma_category(
                         pass
         except Exception:
             continue
+
+    if category.casefold() in ("mobile", "smartphone", "phone") and len(references) < max_items:
+        for seed in CROMA_MOBILE_SEED_CODES:
+            if len(references) >= max_items:
+                break
+            if seed not in seen_codes:
+                seen_codes.add(seed)
+                references.append(
+                    SourceProductReference(
+                        source_product_id=seed,
+                        category=category,
+                        subcategory=None,
+                        source_url=AnyHttpUrl(f"https://www.croma.com/p/{seed}"),
+                    )
+                )
 
     return references

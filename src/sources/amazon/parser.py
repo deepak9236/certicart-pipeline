@@ -20,6 +20,14 @@ from sources.common import (
 from sources.contracts import ParsedProduct, RawSourceRecord
 
 
+def clean_amz_str(val: str | None) -> str:
+    """Clean Amazon strings by stripping invisible direction marks and excess spaces."""
+    if not val:
+        return ""
+    cleaned = val.replace("\u200e", "").replace("\u200f", "").replace("\xa0", " ")
+    return re.sub(r"\s+", " ", cleaned).strip()
+
+
 def extract_amazon_specs(
     sel: Selector,
 ) -> tuple[dict[str, str], dict[str, dict[str, str]]]:
@@ -40,7 +48,7 @@ def extract_amazon_specs(
             or container.css(".a-expander-header span::text").get()
             or container.css(".a-expander-header::text").get()
         )
-        section_name = heading_el.strip() if heading_el else ""
+        section_name = clean_amz_str(heading_el)
         if not section_name:
             continue
         section_name_clean = normalize_text(section_name)
@@ -68,9 +76,9 @@ def extract_amazon_specs(
                     val_el = " ".join(v_pieces)
 
             if key_el and val_el:
-                key_clean = key_el.strip()
-                val_clean = re.sub(r"\s+", " ", val_el).strip()
-                if is_ignored_spec_key(key_clean):
+                key_clean = clean_amz_str(key_el)
+                val_clean = clean_amz_str(val_el)
+                if not key_clean or not val_clean or is_ignored_spec_key(key_clean):
                     continue
                 k_norm = normalize_text(key_clean)
                 specs[k_norm] = val_clean
@@ -108,23 +116,25 @@ def extract_amazon_specs(
                 val_el = " ".join(v_pieces)
 
         if key_el and val_el:
-            key_clean = key_el.strip()
-            val_clean = re.sub(r"\s+", " ", val_el).strip()
-            if not is_ignored_spec_key(key_clean):
-                k_norm = normalize_text(key_clean)
-                if k_norm not in specs:
-                    specs[k_norm] = val_clean
+            key_clean = clean_amz_str(key_el)
+            val_clean = clean_amz_str(val_el)
+            if not key_clean or not val_clean or is_ignored_spec_key(key_clean):
+                continue
+            k_norm = normalize_text(key_clean)
+            if k_norm not in specs:
+                specs[k_norm] = val_clean
 
     # 3. Bullet specifications (#detailBullets_feature_div)
     for li in sel.css("#detailBullets_feature_div li span.a-list-item"):
-        parts = [p.strip() for p in li.css("span::text").getall() if p.strip()]
+        parts = [clean_amz_str(p) for p in li.css("span::text").getall() if clean_amz_str(p)]
         if len(parts) >= 2:
-            key_clean = parts[0].replace(":", "").strip()
-            val_clean = re.sub(r"\s+", " ", parts[1]).strip()
-            if not is_ignored_spec_key(key_clean):
-                k_norm = normalize_text(key_clean)
-                if k_norm not in specs:
-                    specs[k_norm] = val_clean
+            key_clean = clean_amz_str(parts[0].replace(":", ""))
+            val_clean = clean_amz_str(parts[1])
+            if not key_clean or not val_clean or is_ignored_spec_key(key_clean):
+                continue
+            k_norm = normalize_text(key_clean)
+            if k_norm not in specs:
+                specs[k_norm] = val_clean
 
     return specs, sections
 
@@ -312,14 +322,21 @@ def parse_amazon_payload(
             if rev_match:
                 review_count = int(rev_match.group(1).replace(",", ""))
 
-    brand = infer_brand(
-        title,
-        specs.get("brand")
-        or specs.get("brand name")
-        or specs.get("manufacturer")
-        or specs.get("manufacturer name"),
+    brand = clean_amz_str(
+        infer_brand(
+            title,
+            clean_amz_str(
+                specs.get("brand")
+                or specs.get("brand name")
+                or specs.get("manufacturer")
+                or specs.get("manufacturer name")
+            ),
+        )
     )
-    model_name = specs.get("model name") or specs.get("model") or specs.get("series") or title
+    title = clean_amz_str(title)
+    model_name = clean_amz_str(
+        specs.get("model name") or specs.get("model") or specs.get("series") or title
+    )
 
     attributes = build_category_attributes(category, title, specs)
     if sections:
@@ -335,21 +352,24 @@ def parse_amazon_payload(
         else None
     ) or specs.get("asin")
     if asin_val:
-        attributes["asin"] = str(asin_val).strip()
+        attributes["asin"] = clean_amz_str(str(asin_val))
 
     mpn = (
         specs.get("manufacturer part number")
         or specs.get("part number")
         or specs.get("model number")
+        or specs.get("item model number")
     )
     if mpn:
-        attributes["mpn"] = str(mpn).strip()
+        clean_m = clean_amz_str(str(mpn))
+        attributes["mpn"] = clean_m
+        attributes["model_number"] = clean_m
 
     warranty = (
         specs.get("warranty description") or specs.get("warranty") or specs.get("warranty type")
     )
     if warranty:
-        attributes["warranty"] = str(warranty).strip()
+        attributes["warranty"] = clean_amz_str(str(warranty))
 
     return ParsedProduct(
         source="amazon",
@@ -362,7 +382,7 @@ def parse_amazon_payload(
         price_paise=price_paise,
         mrp_paise=mrp_paise,
         in_stock=in_stock,
-        seller=seller,
+        seller=clean_amz_str(seller) if seller else None,
         rating=rating,
         review_count=review_count,
         source_url=source_url,

@@ -1,4 +1,4 @@
-"""Unit tests for Electronics / Mobile category normalizer, rules, and handler."""
+from typing import Any
 
 from categories.electronics.mobile import (
     ConflictReason,
@@ -90,6 +90,70 @@ def test_mobile_hard_conflicts() -> None:
     fp_a18 = MobileIdentityNormalizer.normalize("Apple iPhone 16 Pro A18 Pro (128GB)")
     conf_chip, _ = check_mobile_hard_conflicts(fp_a17, fp_a18)
     assert conf_chip is True
+
+
+def test_mobile_normalizer_extracts_screen_size_and_attributes() -> None:
+    # Test screen size with cm and inch combinations
+    assert (
+        MobileIdentityNormalizer.extract_screen_size_inches(
+            "LAVA Virat V1", {"display size": "17.14 cm (6.75 inch)"}
+        )
+        == 6.75
+    )
+    assert (
+        MobileIdentityNormalizer.extract_screen_size_inches(
+            "Redmi 15A 5G", {"screen size in inches": "6.9 inches"}
+        )
+        == 6.9
+    )
+    assert (
+        MobileIdentityNormalizer.extract_screen_size_inches(
+            "Apple iPhone Air 16.63 cm (6.5″) Display"
+        )
+        == 6.5
+    )
+    assert (
+        MobileIdentityNormalizer.extract_screen_size_inches("Realme Phone 17.22 cm Display") == 6.78
+    )
+
+    # Test full normalization with extra_attributes
+    extra: dict[str, Any] = {
+        "front_camera_mp": 16,
+        "refresh_rate_hz": 120,
+        "fast_charging_w": 67,
+        "water_resistance_rating": "IP68",
+        "screen_protection": "Gorilla Glass Victus",
+        "biometrics": "In-Display Fingerprint",
+        "audio_jack_3_5mm": False,
+        "nfc_supported": True,
+        "weight_grams": 185.5,
+        "sim_type": "Dual SIM",
+        "model_number": "RMX1234",
+        "mpn": "RMX1234",
+        "asin": "B0TESTASIN",
+        "warranty": "1 Year",
+    }
+    fp = MobileIdentityNormalizer.normalize(
+        "Xiaomi 14 5G (Black, 12GB RAM, 512GB Storage)",
+        brand_raw="Xiaomi",
+        model_name_raw="Xiaomi 14",
+        extra_attributes=extra,
+    )
+    assert fp.brand == "xiaomi"
+    assert fp.ram_gb == 12
+    assert fp.storage_gb == 512
+    assert fp.attributes["front_camera_mp"] == 16
+    assert fp.attributes["refresh_rate_hz"] == 120
+    assert fp.attributes["fast_charging_w"] == 67
+    assert fp.attributes["water_resistance_rating"] == "ip68"
+    assert fp.attributes["screen_protection"] == "gorilla glass victus"
+    assert fp.attributes["biometrics"] == "in-display fingerprint"
+    assert fp.attributes["audio_jack_3_5mm"] is False
+    assert fp.attributes["nfc_supported"] is True
+    assert fp.attributes["weight_grams"] == 185.5
+    assert fp.attributes["sim_type"] == "dual sim"
+    assert fp.attributes["asin"] == "b0testasin"
+    assert fp.attributes["warranty"] == "1 year"
 
 
 def test_mobile_handler_similarity() -> None:

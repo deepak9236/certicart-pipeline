@@ -29,7 +29,7 @@
   },
   "clusters": [
     {
-      "cluster_id": "clus_80492cc4f5852374",
+      "cluster_id": "clus_1b9b7d5a54c212a5",
       "category": "laptop",
       "brand": "hp",
       "model_name": "hp laptop",
@@ -38,7 +38,7 @@
         "storage_gb": 1024,
         "storage_type": "ssd",
         "cpu_model": "qualcomm x1-26- 100",
-        "gpu_model": "",
+        "gpu_model": "qualcomm",
         "screen_size_inches": 14.0,
         "operating_system": "windows 11 home",
         "color": "silver",
@@ -124,9 +124,7 @@
             "Packer Contact Information": "HP India Sales Pvt. Ltd.",
             "Warranty Description": "1 year manufacturer warranty on the device from the date of purchase. In case of any technical/product related queries, please call 1800-258-7170 or 1860-258-3079",
             "Manufacturer Part Number": "C08Q7PA",
-            "Best Sellers Rank": "",
-            "ASIN": "B0F8P844W2",
-            "Customer Reviews": ""
+            "ASIN": "B0F8P844W2"
           },
           "Connectivity": {
             "Network Connectivity Technology": "Bluetooth, USB, Wi-Fi",
@@ -202,8 +200,6 @@
         "packer contact information": "hp india sales pvt. ltd.",
         "warranty description": "1 year manufacturer warranty on the device from the date of purchase. in case of any technical/product related queries, please call 1800-258-7170 or 1860-258-3079",
         "manufacturer part number": "c08q7pa",
-        "best sellers rank": "",
-        "customer reviews": "",
         "network connectivity technology": "bluetooth, usb, wi-fi",
         "wireless technology": "wi-fi",
         "computer wireless type": "bluetooth",
@@ -212,13 +208,7 @@
         "total usb ports": "3",
         "hardware interface": "usb",
         "number of ports": "3",
-        "total hdmi port": "1",
-        "brand": "",
-        "hard disk size": "",
-        "cpu model": "",
-        "ram memory installed size": "",
-        "special feature": "",
-        "graphics card description": ""
+        "total hdmi port": "1"
       },
       "fingerprint": {
         "category": "laptop",
@@ -231,7 +221,7 @@
         "storage_gb": 1024,
         "storage_type": "ssd",
         "screen_size_inches": 14.0,
-        "gpu_model": null,
+        "gpu_model": "qualcomm",
         "manufacturer_part_number": null,
         "gtin": null,
         "attributes": {
@@ -239,7 +229,7 @@
           "storage_gb": 1024,
           "storage_type": "ssd",
           "cpu_model": "qualcomm x1-26- 100",
-          "gpu_model": "",
+          "gpu_model": "qualcomm",
           "screen_size_inches": 14.0,
           "operating_system": "windows 11 home",
           "color": "silver",
@@ -325,9 +315,7 @@
               "Packer Contact Information": "HP India Sales Pvt. Ltd.",
               "Warranty Description": "1 year manufacturer warranty on the device from the date of purchase. In case of any technical/product related queries, please call 1800-258-7170 or 1860-258-3079",
               "Manufacturer Part Number": "C08Q7PA",
-              "Best Sellers Rank": "",
-              "ASIN": "B0F8P844W2",
-              "Customer Reviews": ""
+              "ASIN": "B0F8P844W2"
             },
             "Connectivity": {
               "Network Connectivity Technology": "Bluetooth, USB, Wi-Fi",
@@ -403,8 +391,6 @@
           "packer contact information": "hp india sales pvt. ltd.",
           "warranty description": "1 year manufacturer warranty on the device from the date of purchase. in case of any technical/product related queries, please call 1800-258-7170 or 1860-258-3079",
           "manufacturer part number": "c08q7pa",
-          "best sellers rank": "",
-          "customer reviews": "",
           "network connectivity technology": "bluetooth, usb, wi-fi",
           "wireless technology": "wi-fi",
           "computer wireless type": "bluetooth",
@@ -413,13 +399,7 @@
           "total usb ports": "3",
           "hardware interface": "usb",
           "number of ports": "3",
-          "total hdmi port": "1",
-          "brand": "",
-          "hard disk size": "",
-          "cpu model": "",
-          "ram memory installed size": "",
-          "special feature": "",
-          "graphics card description": ""
+          "total hdmi port": "1"
         }
       },
       "offers": [
@@ -438,7 +418,7 @@
           "quality_status": "VALID",
           "quality_score": 100,
           "quality_flags": [],
-          "observed_at": "2026-09-04T17:23:35.943356Z"
+          "observed_at": "2026-09-04T18:08:34.701078Z"
         }
       ],
       "review_candidates": [],
@@ -1002,7 +982,7 @@
           "quality_status": "VALID",
           "quality_score": 100,
           "quality_flags": [],
-          "observed_at": "2026-09-04T17:23:37.680319Z"
+          "observed_at": "2026-09-04T18:08:35.411789Z"
         }
       ],
       "review_candidates": [],
@@ -1013,26 +993,14 @@
       "savings_paise": 0
     },
     {
-      "cluster_id": "clus_f94aa800235a7912",
+      "cluster_id": "clus_828aeae3adee9ad9",
       "category": "laptop",
       "brand": "asus",
       "model_name": "asus expertbook 32gb / 1024gb",
       "attributes": {
         "ram_gb": 32,
         "storage_gb": 1024,
-        "storage_type": "ssd",
-        "spec_sections": "{\"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\"}, \"manufacturer info\": {\"/\": \"asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop\", \"2,98,990\": \"\\u20b91,39,990\", \"1,76,990\": \"\\u20b994,990\", \"1,92,990\": \"\\u20b91,09,990\", \"64 gb\": \"32 gb\", \"4,49,990\": \"\\u20b92,72,990\", \"4.5\": \"location not set\"}}",
-        "flipkart": "a one-stop shopping",
-        "minutes": "everything in minutes",
-        "grocery": "at wholesale prices",
-        "travel": "all your travel needs",
-        "/": "asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop",
-        "2,98,990": "asus tuf gaming a16 (2026) with office 2024 + m365 basic amd ryzen 7 260 - (16 gb/1 tb ssd/windows 11 home/8 gb graphics/nvidia geforce rtx 5050/165 hz) fa608uh-rv112ws gaming laptop",
-        "1,76,990": "asus expertbook p3 ai pc with 1 yr adp intel core ultra 5 225h - (16 gb/512 gb ssd/windows 11 home) p3606ccap-mb1005ws laptop",
-        "1,92,990": "asus expertbook p3 ai pc with 1 yr adp ir cam intel core ultra 7 255h - (16 gb/512 gb ssd/windows 11 home) p3406ccap-ly0127ws thin and light laptop",
-        "64 gb": "32 gb",
-        "4,49,990": "1 tb, 14 inch",
-        "4.5": "delivery & installation details"
+        "storage_type": "ssd"
       },
       "fingerprint": {
         "category": "laptop",
@@ -1051,19 +1019,7 @@
         "attributes": {
           "ram_gb": 32,
           "storage_gb": 1024,
-          "storage_type": "ssd",
-          "spec_sections": "{\"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\"}, \"manufacturer info\": {\"/\": \"asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop\", \"2,98,990\": \"\\u20b91,39,990\", \"1,76,990\": \"\\u20b994,990\", \"1,92,990\": \"\\u20b91,09,990\", \"64 gb\": \"32 gb\", \"4,49,990\": \"\\u20b92,72,990\", \"4.5\": \"location not set\"}}",
-          "flipkart": "a one-stop shopping",
-          "minutes": "everything in minutes",
-          "grocery": "at wholesale prices",
-          "travel": "all your travel needs",
-          "/": "asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop",
-          "2,98,990": "asus tuf gaming a16 (2026) with office 2024 + m365 basic amd ryzen 7 260 - (16 gb/1 tb ssd/windows 11 home/8 gb graphics/nvidia geforce rtx 5050/165 hz) fa608uh-rv112ws gaming laptop",
-          "1,76,990": "asus expertbook p3 ai pc with 1 yr adp intel core ultra 5 225h - (16 gb/512 gb ssd/windows 11 home) p3606ccap-mb1005ws laptop",
-          "1,92,990": "asus expertbook p3 ai pc with 1 yr adp ir cam intel core ultra 7 255h - (16 gb/512 gb ssd/windows 11 home) p3406ccap-ly0127ws thin and light laptop",
-          "64 gb": "32 gb",
-          "4,49,990": "1 tb, 14 inch",
-          "4.5": "delivery & installation details"
+          "storage_type": "ssd"
         }
       },
       "offers": [
@@ -1082,7 +1038,7 @@
           "quality_status": "VALID",
           "quality_score": 70,
           "quality_flags": [],
-          "observed_at": "2026-09-04T17:23:40.216962Z"
+          "observed_at": "2026-09-04T18:08:37.535609Z"
         }
       ],
       "review_candidates": [],
@@ -1093,5 +1049,5 @@
       "savings_paise": 0
     }
   ],
-  "generated_at": "2026-09-04T17:23:40.268626Z"
+  "generated_at": "2026-09-04T18:08:37.582445Z"
 }

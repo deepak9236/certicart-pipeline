@@ -88,16 +88,32 @@ def test_build_category_attributes_laptop() -> None:
     assert attrs["ram size"] == "16 GB"
 
 
-def test_build_category_attributes_generic() -> None:
+def test_build_category_attributes_mobile() -> None:
     raw_specs = {
         "Battery Capacity": "5000 mAh",
-        "Camera Resolution": "50 MP",
+        "Primary Camera": "50 MP",
+        "Front Camera": "16 MP",
+        "RAM": "8 GB",
+        "Internal Storage": "256 GB",
+        "Processor Name": "Snapdragon 7s Gen 2",
+        "Display Size": "17.02 cm (6.7 inch)",
+        "Refresh Rate": "120 Hz",
+        "Fast Charging Capability": "67W",
+        "Operating System": "Android 14",
     }
     attrs = build_category_attributes(
         category="mobile",
-        title="Smartphone Pro Max",
+        title="Realme 12 Pro 5G (Submarine Blue, 8GB RAM, 256GB Storage)",
         raw_specs=raw_specs,
     )
-    assert attrs["battery capacity"] == "5000 mAh"
-    assert attrs["camera resolution"] == "50 MP"
-    assert "ram_gb" not in attrs
+    assert attrs["battery_mah"] == 5000
+    assert attrs["primary_camera_mp"] == 50
+    assert attrs["front_camera_mp"] == 16
+    assert attrs["ram_gb"] == 8
+    assert attrs["storage_gb"] == 256
+    assert attrs["chipset"] == "Snapdragon 7s Gen 2"
+    assert attrs["screen_size_inches"] == 6.7
+    assert attrs["refresh_rate_hz"] == 120
+    assert attrs["fast_charging_w"] == 67
+    assert attrs["operating_system"] == "Android 14"
+    assert attrs["network_type"] == "5G"
