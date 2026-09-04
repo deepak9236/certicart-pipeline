@@ -29,7 +29,7 @@
   },
   "clusters": [
     {
-      "cluster_id": "clus_d5e9adf755d7c9a5",
+      "cluster_id": "clus_8aa3299710a66cda",
       "category": "laptop",
       "brand": "apple",
       "model_name": "macbook air m5",
@@ -37,26 +37,28 @@
         "ram_gb": 16,
         "storage_gb": 512,
         "storage_type": "ssd",
-        "cpu_model": "m5",
-        "gpu_model": "m5 gpu",
+        "cpu_model": "apple m5 m5",
+        "gpu_model": "not available",
         "screen_size_inches": 13.6,
         "operating_system": "macos tahoe",
-        "color": "black",
+        "color": "midnight",
         "keyboard_backlight": true,
+        "webcam_resolution": "1080p fhd",
+        "wifi_standard": "wi-fi 7",
         "model_number": "mdhe4hn/a",
         "laptop type": "macbook",
-        "suitable for": "work, gaming, entertainment, everyday use",
+        "suitable for": "work | gaming | entertainment | everyday use",
         "launch year": "2026",
         "brand": "apple",
         "model series": "macbook air m5",
         "model number": "mdhe4hn/a",
         "dimensions in cm (wxdxh)": "30.41 x 21.5 x 1.13",
-        "product weight": "1.23",
+        "product weight": "1.23 kg",
         "dimensions in inches (wxdxh)": "11.97 x 8.46 x 0.44",
         "os type": "mac os",
         "operating system": "macos tahoe",
-        "display size (in inches)": "13.6",
-        "display size (in cms)": "34.46",
+        "display size (in inches)": "13.6 inches",
+        "display size (in cms)": "34.46 cm",
         "display type": "liquid retina",
         "screen resolution": "2560 x 1664 pixels",
         "aspect ratio": "0",
@@ -73,12 +75,12 @@
         "cache": "0",
         "type of ram": "unifiedmemory",
         "ram": "16gb",
-        "maximum ram": "32",
+        "maximum ram": "32 gb",
         "ram configuration": "configurable to: 24gb or 32gb",
         "storage type": "ssd",
         "hdd capacity": "no hdd",
         "ssd capacity": "512gb",
-        "expandable upto": "4000",
+        "expandable upto": "4000 gb",
         "optical drive": "0",
         "gpu brand": "apple",
         "gpu model": "not available",
@@ -107,7 +109,7 @@
         "type of keyboard": "backlit keyboard",
         "keyboard configuration": "ambient light sensor, 78 (ansi) or 79 (iso) keys including 12 full-height function keys",
         "type of mouse": "force touch trackpad",
-        "lock": "password, fingerprint",
+        "lock": "password | fingerprint",
         "included software": "built-in apps",
         "additional features": "apple intelligence, live translation, universal clipboard, live activities, markup and sketch, apple n1 wireless chip, 4 super cores and 6 efficiency cores, 8\u2011core gpu, neural accelerators, hardware-accelerated ray tracing, 16-core neural engine, 153gb/s memory bandwidth, media engine: video decode engine, prores encode and decode engine, av1 decode, thread networking technology, voiceover, zoom, motion, display and text settings, accessibility reader, voice control, switch control, closed captions, live captions, personal voice, live speech",
         "battery type": "non-removable",
@@ -127,11 +129,11 @@
         "accessories": "1 x 30w usb-c power adapter, 1 x usb-c to magsafe 3 cable (2m)",
         "package includes": "1 x laptop, 1 x 30w usb-c power adapter, 1 x usb-c to magsafe 3 cable (2m), 1 x warranty card",
         "generic name": "laptop",
-        "warranty on main product": "12",
+        "warranty on main product": "12 months",
         "warranty type": "carry-in",
         "standard warranty includes": "manufacturing defects",
         "standard warranty excludes": "physical damage",
-        "warranty on accessories": "6",
+        "warranty on accessories": "6 months",
         "installation & demo applicable": "no",
         "certification": "yes",
         "energy star certification": "yes",
@@ -142,7 +144,172 @@
         "country of origin": "china",
         "country of brand origin": "usa",
         "registered name and address": "infiniti retail ltd. - unit no. 701 & 702, 7th floor, kaledonia, sahar road, andheri (east); mumbai - 400069. india",
-        "customer care contact person": "grievance officer"
+        "customer care contact person": "grievance officer",
+        "processor": "apple m5",
+        "display": "34.46 cms (13.6 inches), liquid retina",
+        "memory": "16gb unified memory ram, 512gb ssd rom",
+        "os": "macos tahoe",
+        "warranty": "12 months",
+        "spec_sections": {
+          "Laptop Category": {
+            "Laptop Type": "MacBook",
+            "Suitable For": "Work | Gaming | Entertainment | Everyday Use",
+            "Launch Year": "2026"
+          },
+          "Manufacturer Details": {
+            "Brand": "Apple",
+            "Model Series": "MacBook Air M5",
+            "Model Number": "MDHE4HN/A"
+          },
+          "Product Dimensions (Open)": {
+            "Dimensions In CM (WxDxH)": "30.41 x 21.5 x 1.13",
+            "Product Weight": "1.23 Kg",
+            "Dimensions In Inches (WxDxH)": "11.97 x 8.46 x 0.44"
+          },
+          "Operating System": {
+            "OS Type": "Mac OS",
+            "Operating System": "macOS Tahoe"
+          },
+          "Laptop Screen Specifications": {
+            "Display Size (In Inches)": "13.6 Inches",
+            "Display Size (In Cms)": "34.46 cm",
+            "Display Type": "Liquid Retina",
+            "Screen Resolution": "2560 x 1664 pixels",
+            "Touch Screen": "No",
+            "Additional Screen Specifications": "LED-backlit display with IPS Technology, 224 Pixels Per Inch, 500 Nits Brightness, 1 Billion Colors, Wide Color (P3), True Tone Technology, Video Playback: Supported formats include HEVC, H.264, AV1 and ProRes, ProRes RAW, HDR with Dolby Vision, HDR10+/HDR10 and HLG"
+          },
+          "Display Connectivity": {
+            "Display Connectivity": "iPhone Mirroring"
+          },
+          "Laptop Processor Details": {
+            "Processor Brand": "Apple",
+            "Processor Type": "M5",
+            "Processor Variant": "M5",
+            "Number Of Cores": "10-cores"
+          },
+          "Internal Memory": {
+            "Type of RAM": "UnifiedMemory",
+            "RAM": "16GB",
+            "Maximum RAM": "32 GB",
+            "RAM Configuration": "Configurable to: 24GB or 32GB"
+          },
+          "Storage Specification": {
+            "Storage Type": "SSD",
+            "HDD Capacity": "No HDD",
+            "SSD Capacity": "512GB",
+            "Expandable Upto": "4000 GB"
+          },
+          "Graphic Processor": {
+            "GPU Brand": "Apple"
+          },
+          "Sound": {
+            "Additional Audio Features": "Immersive Sound System, Built-in Speakers, Three-mic Array with Directional Beamforming, Voice Isolation & Wide Spectrum Microphone Modes",
+            "Audio Technology": "Dolby Digital, Dolby Digital Plus and Dolby Atmos, Spatial Audio with Dynamic Head Tracking",
+            "Speaker Type": "Quad Speakers",
+            "Music Playback Format Supported": "AAC, MP3, Apple Lossless, FLAC",
+            "Audio Jack Port": "3.5mm - Headphone Port"
+          },
+          "Ports & Slots": {
+            "Aux Port Type": "3.5mm - Headphone Port",
+            "Number Of USB Ports": "2 x USB 4",
+            "Type of DisplayPort": "DisplayPort",
+            "Thunderbolt Port Type": "Thunderbolt 4",
+            "HDMI Type": "No HDMI",
+            "USB Types Supported": "USB Type C",
+            "Number Of Thunderbolt Ports": "2"
+          },
+          "Network Connectivity": {
+            "Bluetooth Supported": "Yes",
+            "WiFi Specifications": "Wi-Fi 7, 802.11be 2x2",
+            "Wi-Fi Supported": "Yes",
+            "Bluetooth Specifications": "Bluetooth 6.0"
+          },
+          "Laptop Camera Type": {
+            "Camera Type": "Webcam",
+            "Camera Resolution": "1080p",
+            "Camera Features": "12MP Center Stage Camera, Advanced Image Signal Processor with Computational Video, Desk View"
+          },
+          "Keyboard Specification": {
+            "Type of Keyboard": "Backlit Keyboard",
+            "Keyboard Configuration": "Ambient Light Sensor, 78 (ANSI) or 79 (ISO) Keys Including 12 Full-height Function Keys"
+          },
+          "Mouse Specification": {
+            "Type of Mouse": "Force Touch Trackpad"
+          },
+          "Access Control And Security": {
+            "Lock": "Password | Fingerprint"
+          },
+          "Additional Features": {
+            "Included Software": "Built-in Apps",
+            "Additional Features": "Apple Intelligence, Live Translation, Universal Clipboard, Live Activities, Markup and Sketch, Apple N1 Wireless Chip, 4 Super Cores and 6 Efficiency Cores, 8\u2011core GPU, Neural Accelerators, Hardware-Accelerated Ray Tracing, 16-core Neural Engine, 153GB/s Memory Bandwidth, Media Engine: Video Decode Engine, ProRes Encode and Decode Engine, AV1 Decode, Thread Networking Technology, VoiceOver, Zoom, Motion, Display and Text Settings, Accessibility Reader, Voice Control, Switch Control, Closed Captions, Live Captions, Personal Voice, Live Speech"
+          },
+          "Laptop Battery": {
+            "Battery Type": "Non-Removable",
+            "Battery Technology": "Lithium Polymer",
+            "Standard Battery Life": "Up to 18 Hours Video Streaming, Upto 15 Hours Wireless Web"
+          },
+          "Charging": {
+            "Fast Charging Capability": "Yes",
+            "Battery Charge Time": "Charge 50% in Just 30 Minutes",
+            "Additional Charging Features": "Built-in 53.8 Watt Hour Lithium Polymer Battery, 30W USB-C Power Adapter (included with M5 with 8-core GPU), Fast-charge Capable with 70W or Higher USB PD Power Source"
+          },
+          "Plug Details": {
+            "Voltage Rating": "100V - 240V AC",
+            "Power Pin Type": "MagSafe 3",
+            "Frequency": "50Hz - 60Hz"
+          },
+          "Materials & Durability": {
+            "Body Material": "Aluminum"
+          },
+          "Aesthetics": {
+            "Brand Color": "Midnight",
+            "Color": "BLACK"
+          },
+          "In The Box": {
+            "Documents": "1 x Warranty Card",
+            "Main product": "1 x Laptop U",
+            "Accessories": "1 x 30W USB-C Power Adapter, 1 x USB-C to MagSafe 3 Cable (2M)",
+            "Package Includes": "1 x Laptop, 1 x 30W USB-C Power Adapter, 1 x USB-C to MagSafe 3 Cable (2M), 1 x Warranty Card",
+            "Generic Name": "Laptop"
+          },
+          "After Sales & Services": {
+            "Warranty on Main Product": "12 Months",
+            "Warranty Type": "Carry-In",
+            "Standard Warranty Includes": "Manufacturing Defects",
+            "Standard Warranty Excludes": "Physical Damage",
+            "Warranty on Accessories": "6 Months",
+            "Installation & Demo applicable": "No"
+          },
+          "Certification": {
+            "Certification": "Yes",
+            "Energy Star Certification": "Yes",
+            "Certifications": "Energy Star Certification"
+          },
+          "Company Contact Information": {
+            "Customer Support Number": "18005727662",
+            "Customer Support Email": "customersupport@croma.com",
+            "Manufacturer/Importer/Marketer Name & Address": "Manufacture Name & Address: Apple Inc, One Apple Park Way, Cupertino, CA 95014, USA | Importer Name & Address: Apple India Private. Ltd.,13Th Floor, Prestige Minsk Square, Municipal No. 6, Cubbon Road, Bengaluru, Karnataka - 560 001 India",
+            "Country of Origin": "China",
+            "Country of Brand Origin": "USA"
+          },
+          "Croma Service Promise": {
+            "Customer Support Email": "customersupport@croma.com",
+            "Registered Name and Address": "Infiniti Retail Ltd. - Unit No. 701 & 702, 7th Floor, Kaledonia, Sahar Road, Andheri (East); Mumbai - 400069. India",
+            "Customer Support Number": "1800 572 7662",
+            "Customer Care Contact Person": "Grievance Officer"
+          },
+          "Key Features": {
+            "Processor": "Apple M5",
+            "Display": "34.46 cms (13.6 inches), Liquid Retina",
+            "Memory": "16GB Unified Memory RAM, 512GB SSD ROM",
+            "OS": "macOS Tahoe",
+            "Feature 5": "Apple Intelligence, Touch ID, Ambient Light Sensor",
+            "Warranty": "1 Year Limited"
+          },
+          "Overview": {
+            "Description": "Apple M5 Architecture Powered by the Apple M5 chip, this Apple MacBook Air M5 13.6-inch Laptop delivers balanced performance across everyday and creative workloads. With a 10-core CPU featuring 4 performance cores and 6 efficiency cores, along with an 8-core GPU and 16-core Neural Engine, it supports smooth multitasking and graphics processing. In addition, 153GB/s memory bandwidth enables rapid data movement across components. Therefore, editing, productivity tasks, and AI-driven applications operate with steady responsiveness. Unified 16GB Memory Equipped with 16GB unified memory, this 13.6-inch laptop enables efficient data sharing between the CPU and GPU within a single architecture. Thus, handling multiple applications, editing high-resolution content, and managing background tasks remains fluid during daily workflows. Fast 512GB SSD Designed with a 512GB SSD, this MacBook provides dependable storage for documents, media, and project files. Therefore, system startup, application launches, and file transfers occur quickly, supporting consistent productivity throughout the day. Advanced macOS Tahoe Integration Running on macOS Tahoe, this laptop delivers a refined interface, improved productivity tools, and seamless integration with the Apple ecosystem. Consequently, everyday tasks such as multitasking, file management, and device syncing become smoother and more efficient, enhancing the overall user experience. Liquid Retina Display Featuring a 13.6-inch Liquid Retina display with 2560x1664 native resolution at 224 pixels per inch, this laptop delivers sharp visuals and detailed text clarity. In addition, IPS technology and up to 500 nits brightness help maintain clear visibility in various lighting conditions. Hence, reviewing presentations, streaming content, and creative editing feels visually precise. All-Day Battery Support Fitted with a battery capable of up to 18 hours of video streaming and up to 15 hours of wireless web usage, this laptop supports extended operation. Thus, you can work, browse, and stream for long periods without frequent charging interruptions. Fast MagSafe Charging Supporting fast charging with a 70W or higher USB PD power source and featuring a MagSafe 3 charging port, this laptop reduces downtime between sessions. So, you can quickly regain battery power and resume tasks efficiently. 12MP Center Stage Camera Integrated with a 12MP Center Stage camera, this MacBook ensures clear and well-balanced video output during calls and recordings. In addition, automatic framing keeps you positioned within the frame as you move. Therefore, virtual meetings feel natural and visually steady during professional interactions. Full HD Recording Support Supporting 1080p HD video recording along with Desk View functionality, this Apple laptop enhances presentation flexibility during calls. Thus, you can share workspace views clearly while maintaining sharp on-screen video quality for seamless communication."
+          }
+        }
       },
       "fingerprint": {
         "category": "laptop",
@@ -150,38 +317,40 @@
         "family": "macbook air",
         "model_name": "macbook air m5",
         "generation": null,
-        "chip": "m5",
+        "chip": "apple m5 m5",
         "ram_gb": 16,
         "storage_gb": 512,
         "storage_type": "ssd",
         "screen_size_inches": 13.6,
-        "gpu_model": "m5 gpu",
+        "gpu_model": "not available",
         "manufacturer_part_number": null,
         "gtin": null,
         "attributes": {
           "ram_gb": 16,
           "storage_gb": 512,
           "storage_type": "ssd",
-          "cpu_model": "m5",
-          "gpu_model": "m5 gpu",
+          "cpu_model": "apple m5 m5",
+          "gpu_model": "not available",
           "screen_size_inches": 13.6,
           "operating_system": "macos tahoe",
-          "color": "black",
+          "color": "midnight",
           "keyboard_backlight": true,
+          "webcam_resolution": "1080p fhd",
+          "wifi_standard": "wi-fi 7",
           "model_number": "mdhe4hn/a",
           "laptop type": "macbook",
-          "suitable for": "work, gaming, entertainment, everyday use",
+          "suitable for": "work | gaming | entertainment | everyday use",
           "launch year": "2026",
           "brand": "apple",
           "model series": "macbook air m5",
           "model number": "mdhe4hn/a",
           "dimensions in cm (wxdxh)": "30.41 x 21.5 x 1.13",
-          "product weight": "1.23",
+          "product weight": "1.23 kg",
           "dimensions in inches (wxdxh)": "11.97 x 8.46 x 0.44",
           "os type": "mac os",
           "operating system": "macos tahoe",
-          "display size (in inches)": "13.6",
-          "display size (in cms)": "34.46",
+          "display size (in inches)": "13.6 inches",
+          "display size (in cms)": "34.46 cm",
           "display type": "liquid retina",
           "screen resolution": "2560 x 1664 pixels",
           "aspect ratio": "0",
@@ -198,12 +367,12 @@
           "cache": "0",
           "type of ram": "unifiedmemory",
           "ram": "16gb",
-          "maximum ram": "32",
+          "maximum ram": "32 gb",
           "ram configuration": "configurable to: 24gb or 32gb",
           "storage type": "ssd",
           "hdd capacity": "no hdd",
           "ssd capacity": "512gb",
-          "expandable upto": "4000",
+          "expandable upto": "4000 gb",
           "optical drive": "0",
           "gpu brand": "apple",
           "gpu model": "not available",
@@ -232,7 +401,7 @@
           "type of keyboard": "backlit keyboard",
           "keyboard configuration": "ambient light sensor, 78 (ansi) or 79 (iso) keys including 12 full-height function keys",
           "type of mouse": "force touch trackpad",
-          "lock": "password, fingerprint",
+          "lock": "password | fingerprint",
           "included software": "built-in apps",
           "additional features": "apple intelligence, live translation, universal clipboard, live activities, markup and sketch, apple n1 wireless chip, 4 super cores and 6 efficiency cores, 8\u2011core gpu, neural accelerators, hardware-accelerated ray tracing, 16-core neural engine, 153gb/s memory bandwidth, media engine: video decode engine, prores encode and decode engine, av1 decode, thread networking technology, voiceover, zoom, motion, display and text settings, accessibility reader, voice control, switch control, closed captions, live captions, personal voice, live speech",
           "battery type": "non-removable",
@@ -252,11 +421,11 @@
           "accessories": "1 x 30w usb-c power adapter, 1 x usb-c to magsafe 3 cable (2m)",
           "package includes": "1 x laptop, 1 x 30w usb-c power adapter, 1 x usb-c to magsafe 3 cable (2m), 1 x warranty card",
           "generic name": "laptop",
-          "warranty on main product": "12",
+          "warranty on main product": "12 months",
           "warranty type": "carry-in",
           "standard warranty includes": "manufacturing defects",
           "standard warranty excludes": "physical damage",
-          "warranty on accessories": "6",
+          "warranty on accessories": "6 months",
           "installation & demo applicable": "no",
           "certification": "yes",
           "energy star certification": "yes",
@@ -267,7 +436,172 @@
           "country of origin": "china",
           "country of brand origin": "usa",
           "registered name and address": "infiniti retail ltd. - unit no. 701 & 702, 7th floor, kaledonia, sahar road, andheri (east); mumbai - 400069. india",
-          "customer care contact person": "grievance officer"
+          "customer care contact person": "grievance officer",
+          "processor": "apple m5",
+          "display": "34.46 cms (13.6 inches), liquid retina",
+          "memory": "16gb unified memory ram, 512gb ssd rom",
+          "os": "macos tahoe",
+          "warranty": "12 months",
+          "spec_sections": {
+            "Laptop Category": {
+              "Laptop Type": "MacBook",
+              "Suitable For": "Work | Gaming | Entertainment | Everyday Use",
+              "Launch Year": "2026"
+            },
+            "Manufacturer Details": {
+              "Brand": "Apple",
+              "Model Series": "MacBook Air M5",
+              "Model Number": "MDHE4HN/A"
+            },
+            "Product Dimensions (Open)": {
+              "Dimensions In CM (WxDxH)": "30.41 x 21.5 x 1.13",
+              "Product Weight": "1.23 Kg",
+              "Dimensions In Inches (WxDxH)": "11.97 x 8.46 x 0.44"
+            },
+            "Operating System": {
+              "OS Type": "Mac OS",
+              "Operating System": "macOS Tahoe"
+            },
+            "Laptop Screen Specifications": {
+              "Display Size (In Inches)": "13.6 Inches",
+              "Display Size (In Cms)": "34.46 cm",
+              "Display Type": "Liquid Retina",
+              "Screen Resolution": "2560 x 1664 pixels",
+              "Touch Screen": "No",
+              "Additional Screen Specifications": "LED-backlit display with IPS Technology, 224 Pixels Per Inch, 500 Nits Brightness, 1 Billion Colors, Wide Color (P3), True Tone Technology, Video Playback: Supported formats include HEVC, H.264, AV1 and ProRes, ProRes RAW, HDR with Dolby Vision, HDR10+/HDR10 and HLG"
+            },
+            "Display Connectivity": {
+              "Display Connectivity": "iPhone Mirroring"
+            },
+            "Laptop Processor Details": {
+              "Processor Brand": "Apple",
+              "Processor Type": "M5",
+              "Processor Variant": "M5",
+              "Number Of Cores": "10-cores"
+            },
+            "Internal Memory": {
+              "Type of RAM": "UnifiedMemory",
+              "RAM": "16GB",
+              "Maximum RAM": "32 GB",
+              "RAM Configuration": "Configurable to: 24GB or 32GB"
+            },
+            "Storage Specification": {
+              "Storage Type": "SSD",
+              "HDD Capacity": "No HDD",
+              "SSD Capacity": "512GB",
+              "Expandable Upto": "4000 GB"
+            },
+            "Graphic Processor": {
+              "GPU Brand": "Apple"
+            },
+            "Sound": {
+              "Additional Audio Features": "Immersive Sound System, Built-in Speakers, Three-mic Array with Directional Beamforming, Voice Isolation & Wide Spectrum Microphone Modes",
+              "Audio Technology": "Dolby Digital, Dolby Digital Plus and Dolby Atmos, Spatial Audio with Dynamic Head Tracking",
+              "Speaker Type": "Quad Speakers",
+              "Music Playback Format Supported": "AAC, MP3, Apple Lossless, FLAC",
+              "Audio Jack Port": "3.5mm - Headphone Port"
+            },
+            "Ports & Slots": {
+              "Aux Port Type": "3.5mm - Headphone Port",
+              "Number Of USB Ports": "2 x USB 4",
+              "Type of DisplayPort": "DisplayPort",
+              "Thunderbolt Port Type": "Thunderbolt 4",
+              "HDMI Type": "No HDMI",
+              "USB Types Supported": "USB Type C",
+              "Number Of Thunderbolt Ports": "2"
+            },
+            "Network Connectivity": {
+              "Bluetooth Supported": "Yes",
+              "WiFi Specifications": "Wi-Fi 7, 802.11be 2x2",
+              "Wi-Fi Supported": "Yes",
+              "Bluetooth Specifications": "Bluetooth 6.0"
+            },
+            "Laptop Camera Type": {
+              "Camera Type": "Webcam",
+              "Camera Resolution": "1080p",
+              "Camera Features": "12MP Center Stage Camera, Advanced Image Signal Processor with Computational Video, Desk View"
+            },
+            "Keyboard Specification": {
+              "Type of Keyboard": "Backlit Keyboard",
+              "Keyboard Configuration": "Ambient Light Sensor, 78 (ANSI) or 79 (ISO) Keys Including 12 Full-height Function Keys"
+            },
+            "Mouse Specification": {
+              "Type of Mouse": "Force Touch Trackpad"
+            },
+            "Access Control And Security": {
+              "Lock": "Password | Fingerprint"
+            },
+            "Additional Features": {
+              "Included Software": "Built-in Apps",
+              "Additional Features": "Apple Intelligence, Live Translation, Universal Clipboard, Live Activities, Markup and Sketch, Apple N1 Wireless Chip, 4 Super Cores and 6 Efficiency Cores, 8\u2011core GPU, Neural Accelerators, Hardware-Accelerated Ray Tracing, 16-core Neural Engine, 153GB/s Memory Bandwidth, Media Engine: Video Decode Engine, ProRes Encode and Decode Engine, AV1 Decode, Thread Networking Technology, VoiceOver, Zoom, Motion, Display and Text Settings, Accessibility Reader, Voice Control, Switch Control, Closed Captions, Live Captions, Personal Voice, Live Speech"
+            },
+            "Laptop Battery": {
+              "Battery Type": "Non-Removable",
+              "Battery Technology": "Lithium Polymer",
+              "Standard Battery Life": "Up to 18 Hours Video Streaming, Upto 15 Hours Wireless Web"
+            },
+            "Charging": {
+              "Fast Charging Capability": "Yes",
+              "Battery Charge Time": "Charge 50% in Just 30 Minutes",
+              "Additional Charging Features": "Built-in 53.8 Watt Hour Lithium Polymer Battery, 30W USB-C Power Adapter (included with M5 with 8-core GPU), Fast-charge Capable with 70W or Higher USB PD Power Source"
+            },
+            "Plug Details": {
+              "Voltage Rating": "100V - 240V AC",
+              "Power Pin Type": "MagSafe 3",
+              "Frequency": "50Hz - 60Hz"
+            },
+            "Materials & Durability": {
+              "Body Material": "Aluminum"
+            },
+            "Aesthetics": {
+              "Brand Color": "Midnight",
+              "Color": "BLACK"
+            },
+            "In The Box": {
+              "Documents": "1 x Warranty Card",
+              "Main product": "1 x Laptop U",
+              "Accessories": "1 x 30W USB-C Power Adapter, 1 x USB-C to MagSafe 3 Cable (2M)",
+              "Package Includes": "1 x Laptop, 1 x 30W USB-C Power Adapter, 1 x USB-C to MagSafe 3 Cable (2M), 1 x Warranty Card",
+              "Generic Name": "Laptop"
+            },
+            "After Sales & Services": {
+              "Warranty on Main Product": "12 Months",
+              "Warranty Type": "Carry-In",
+              "Standard Warranty Includes": "Manufacturing Defects",
+              "Standard Warranty Excludes": "Physical Damage",
+              "Warranty on Accessories": "6 Months",
+              "Installation & Demo applicable": "No"
+            },
+            "Certification": {
+              "Certification": "Yes",
+              "Energy Star Certification": "Yes",
+              "Certifications": "Energy Star Certification"
+            },
+            "Company Contact Information": {
+              "Customer Support Number": "18005727662",
+              "Customer Support Email": "customersupport@croma.com",
+              "Manufacturer/Importer/Marketer Name & Address": "Manufacture Name & Address: Apple Inc, One Apple Park Way, Cupertino, CA 95014, USA | Importer Name & Address: Apple India Private. Ltd.,13Th Floor, Prestige Minsk Square, Municipal No. 6, Cubbon Road, Bengaluru, Karnataka - 560 001 India",
+              "Country of Origin": "China",
+              "Country of Brand Origin": "USA"
+            },
+            "Croma Service Promise": {
+              "Customer Support Email": "customersupport@croma.com",
+              "Registered Name and Address": "Infiniti Retail Ltd. - Unit No. 701 & 702, 7th Floor, Kaledonia, Sahar Road, Andheri (East); Mumbai - 400069. India",
+              "Customer Support Number": "1800 572 7662",
+              "Customer Care Contact Person": "Grievance Officer"
+            },
+            "Key Features": {
+              "Processor": "Apple M5",
+              "Display": "34.46 cms (13.6 inches), Liquid Retina",
+              "Memory": "16GB Unified Memory RAM, 512GB SSD ROM",
+              "OS": "macOS Tahoe",
+              "Feature 5": "Apple Intelligence, Touch ID, Ambient Light Sensor",
+              "Warranty": "1 Year Limited"
+            },
+            "Overview": {
+              "Description": "Apple M5 Architecture Powered by the Apple M5 chip, this Apple MacBook Air M5 13.6-inch Laptop delivers balanced performance across everyday and creative workloads. With a 10-core CPU featuring 4 performance cores and 6 efficiency cores, along with an 8-core GPU and 16-core Neural Engine, it supports smooth multitasking and graphics processing. In addition, 153GB/s memory bandwidth enables rapid data movement across components. Therefore, editing, productivity tasks, and AI-driven applications operate with steady responsiveness. Unified 16GB Memory Equipped with 16GB unified memory, this 13.6-inch laptop enables efficient data sharing between the CPU and GPU within a single architecture. Thus, handling multiple applications, editing high-resolution content, and managing background tasks remains fluid during daily workflows. Fast 512GB SSD Designed with a 512GB SSD, this MacBook provides dependable storage for documents, media, and project files. Therefore, system startup, application launches, and file transfers occur quickly, supporting consistent productivity throughout the day. Advanced macOS Tahoe Integration Running on macOS Tahoe, this laptop delivers a refined interface, improved productivity tools, and seamless integration with the Apple ecosystem. Consequently, everyday tasks such as multitasking, file management, and device syncing become smoother and more efficient, enhancing the overall user experience. Liquid Retina Display Featuring a 13.6-inch Liquid Retina display with 2560x1664 native resolution at 224 pixels per inch, this laptop delivers sharp visuals and detailed text clarity. In addition, IPS technology and up to 500 nits brightness help maintain clear visibility in various lighting conditions. Hence, reviewing presentations, streaming content, and creative editing feels visually precise. All-Day Battery Support Fitted with a battery capable of up to 18 hours of video streaming and up to 15 hours of wireless web usage, this laptop supports extended operation. Thus, you can work, browse, and stream for long periods without frequent charging interruptions. Fast MagSafe Charging Supporting fast charging with a 70W or higher USB PD power source and featuring a MagSafe 3 charging port, this laptop reduces downtime between sessions. So, you can quickly regain battery power and resume tasks efficiently. 12MP Center Stage Camera Integrated with a 12MP Center Stage camera, this MacBook ensures clear and well-balanced video output during calls and recordings. In addition, automatic framing keeps you positioned within the frame as you move. Therefore, virtual meetings feel natural and visually steady during professional interactions. Full HD Recording Support Supporting 1080p HD video recording along with Desk View functionality, this Apple laptop enhances presentation flexibility during calls. Thus, you can share workspace views clearly while maintaining sharp on-screen video quality for seamless communication."
+            }
+          }
         }
       },
       "offers": [
@@ -286,7 +620,7 @@
           "quality_status": "VALID",
           "quality_score": 100,
           "quality_flags": [],
-          "observed_at": "2026-09-04T16:27:42.138252Z"
+          "observed_at": "2026-09-04T16:40:07.552402Z"
         }
       ],
       "review_candidates": [],
@@ -297,7 +631,7 @@
       "savings_paise": 0
     },
     {
-      "cluster_id": "clus_bc00dcc944552d38",
+      "cluster_id": "clus_c5c8d3b02870c403",
       "category": "laptop",
       "brand": "asus",
       "model_name": "asus expertbook 32gb / 1024gb",
@@ -310,13 +644,13 @@
         "grocery": "at wholesale prices",
         "travel": "all your travel needs",
         "/": "asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop",
-        "97,990": "asus vivobook 16 (2026) ai pc with office 2024 + m365 basic*, copilot+ pc amd ryzen ai 7 hexa core 445 - (16 gb/512 gb ssd/windows 11 home) m1607ga-mb029ws thin and light laptop",
+        "2,98,990": "asus tuf gaming a16 (2026) with office 2024 + m365 basic amd ryzen 7 260 - (16 gb/1 tb ssd/windows 11 home/8 gb graphics/nvidia geforce rtx 5050/165 hz) fa608uh-rv112ws gaming laptop",
         "1,76,990": "asus expertbook p3 ai pc with 1 yr adp intel core ultra 5 225h - (16 gb/512 gb ssd/windows 11 home) p3606ccap-mb1005ws laptop",
         "84,990": "asus expertbook p1 (i3 14th gen) with 1 yr adp intel core 3 14th gen 100u - (8 gb/512 gb ssd/windows 11 home) p1503cva-s72562ws thin and light laptop",
         "64 gb": "32 gb",
         "4,49,990": "1 tb, 14 inch",
         "4.5": "delivery & installation details",
-        "spec_sections": "{\"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\"}, \"manufacturer info\": {\"/\": \"asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop\", \"97,990\": \"\\u20b992,990\", \"1,76,990\": \"\\u20b994,990\", \"84,990\": \"\\u20b961,990\", \"64 gb\": \"32 gb\", \"4,49,990\": \"\\u20b92,72,990\", \"4.5\": \"location not set\"}}"
+        "spec_sections": "{\"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\"}, \"manufacturer info\": {\"/\": \"asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop\", \"2,98,990\": \"\\u20b91,39,990\", \"1,76,990\": \"\\u20b994,990\", \"84,990\": \"\\u20b961,990\", \"64 gb\": \"32 gb\", \"4,49,990\": \"\\u20b92,72,990\", \"4.5\": \"location not set\"}}"
       },
       "fingerprint": {
         "category": "laptop",
@@ -341,13 +675,13 @@
           "grocery": "at wholesale prices",
           "travel": "all your travel needs",
           "/": "asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop",
-          "97,990": "asus vivobook 16 (2026) ai pc with office 2024 + m365 basic*, copilot+ pc amd ryzen ai 7 hexa core 445 - (16 gb/512 gb ssd/windows 11 home) m1607ga-mb029ws thin and light laptop",
+          "2,98,990": "asus tuf gaming a16 (2026) with office 2024 + m365 basic amd ryzen 7 260 - (16 gb/1 tb ssd/windows 11 home/8 gb graphics/nvidia geforce rtx 5050/165 hz) fa608uh-rv112ws gaming laptop",
           "1,76,990": "asus expertbook p3 ai pc with 1 yr adp intel core ultra 5 225h - (16 gb/512 gb ssd/windows 11 home) p3606ccap-mb1005ws laptop",
           "84,990": "asus expertbook p1 (i3 14th gen) with 1 yr adp intel core 3 14th gen 100u - (8 gb/512 gb ssd/windows 11 home) p1503cva-s72562ws thin and light laptop",
           "64 gb": "32 gb",
           "4,49,990": "1 tb, 14 inch",
           "4.5": "delivery & installation details",
-          "spec_sections": "{\"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\"}, \"manufacturer info\": {\"/\": \"asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop\", \"97,990\": \"\\u20b992,990\", \"1,76,990\": \"\\u20b994,990\", \"84,990\": \"\\u20b961,990\", \"64 gb\": \"32 gb\", \"4,49,990\": \"\\u20b92,72,990\", \"4.5\": \"location not set\"}}"
+          "spec_sections": "{\"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\"}, \"manufacturer info\": {\"/\": \"asus expertbook ultra copilot+ pc intel core ultra x7 358h - (32 gb/1 tb ssd/windows 11 home) b9406caa-th1205ws thin and light laptop\", \"2,98,990\": \"\\u20b91,39,990\", \"1,76,990\": \"\\u20b994,990\", \"84,990\": \"\\u20b961,990\", \"64 gb\": \"32 gb\", \"4,49,990\": \"\\u20b92,72,990\", \"4.5\": \"location not set\"}}"
         }
       },
       "offers": [
@@ -366,7 +700,7 @@
           "quality_status": "VALID",
           "quality_score": 70,
           "quality_flags": [],
-          "observed_at": "2026-09-04T16:27:43.355740Z"
+          "observed_at": "2026-09-04T16:40:39.727602Z"
         }
       ],
       "review_candidates": [],
@@ -377,7 +711,7 @@
       "savings_paise": 0
     },
     {
-      "cluster_id": "clus_8f6f29b2088bb494",
+      "cluster_id": "clus_a105baee2eb65e35",
       "category": "mobile",
       "brand": "lava",
       "model_name": "lava virat v1 (4gb / 64gb)",
@@ -427,12 +761,13 @@
         "name and address of the manufacturer": "lava international b-4, sector-63, noida-201301 u.p. india",
         "name and address of the packer": "lava international b-4, sector-63, noida-201301 u.p. india",
         "\u20b927,999": "similar products",
+        "\u20b917,499": "ai+ nova 2 5g (black, 128 gb) 4 gb ram",
         "\u20b915,499": "ai+ pulse 2 (green, 128 gb) 4 gb ram",
-        "\u20b917,499": "ai+ nova 2 5g (green, 128 gb) 4 gb ram",
         "\u20b912,999": "oppo a5x (laser white, 64 gb) 4 gb ram",
         "\u20b915,999": "lava virat v1 5g (sonar gold, 64 gb) 4 gb ram",
         "\u20b929,999": "realme c100x (golden coast, 64 gb) 4 gb ram",
-        "spec_sections": "{\"battery & power features\": {\"battery capacity\": \"5000 mah\"}, \"general\": {\"brand\": \"lava\", \"in the box\": \"1 x handset, 1 x usb cable type-c, 1 x charger, 1 x sim ejector pin, 1 x back cover\", \"model number\": \"lzg415\", \"model name\": \"virat v1\", \"color\": \"nilgiri blue\", \"browse type\": \"smartphones\", \"sim type\": \"dual sim\", \"hybrid sim slot\": \"no\", \"touchscreen\": \"yes\", \"otg compatible\": \"yes\", \"headset present\": \"no\", \"phablet\": \"no\"}, \"display features\": {\"display size\": \"17.14 cm (6.75 inch)\", \"resolution\": \"720 x 1600 pixels\"}, \"os & processor features\": {\"operating system\": \"android 15\", \"processor brand\": \"unisoc\", \"processor core\": \"octa core\", \"primary clock speed\": \"2.6 ghz\"}, \"memory & storage features\": {\"internal storage\": \"64 gb\", \"ram\": \"4 gb\", \"memory card slot type\": \"dedicated slot\"}, \"camera features\": {\"primary camera\": \"13mp rear camera\", \"dual camera lens\": \"primary camera\"}, \"connectivity features\": {\"network type\": \"2g, 3g, 4g\", \"supported networks\": \"4g lte\"}, \"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\", \"warranty summary\": \"1 year manufacturer warranty for device and 6 months for in-box accessories\"}, \"manufacturer info\": {\"/\": \"virat v1 (nilgiri blue, 64 gb)\", \"12,999\": \"\\u20b99,999\", \"4.4\": \"location not set\", \"battery capacity\": \"5000 mah\", \"brand\": \"lava\", \"in the box\": \"1 x handset, 1 x usb cable type-c, 1 x charger, 1 x sim ejector pin, 1 x back cover\", \"model number\": \"lzg415\", \"model name\": \"virat v1\", \"color\": \"nilgiri blue\", \"browse type\": \"smartphones\", \"sim type\": \"dual sim\", \"hybrid sim slot\": \"no\", \"touchscreen\": \"yes\", \"otg compatible\": \"yes\", \"headset present\": \"no\", \"phablet\": \"no\", \"display size\": \"17.14 cm (6.75 inch)\", \"resolution\": \"720 x 1600 pixels\", \"operating system\": \"android 15\", \"processor brand\": \"unisoc\", \"processor core\": \"octa core\", \"primary clock speed\": \"2.6 ghz\", \"internal storage\": \"64 gb\", \"ram\": \"4 gb\", \"memory card slot type\": \"dedicated slot\", \"primary camera\": \"13mp rear camera\", \"dual camera lens\": \"primary camera\", \"network type\": \"2g, 3g, 4g\", \"supported networks\": \"4g lte\", \"generic name\": \"mobiles\", \"country of origin\": \"india\", \"name and address of the manufacturer\": \"lava international b-4, sector-63, noida-201301 u.p. india\", \"name and address of the packer\": \"lava international b-4, sector-63, noida-201301 u.p. india\", \"\\u20b927,999\": \"\\u20b919,999\", \"\\u20b915,499\": \"\\u20b911,499\", \"\\u20b917,499\": \"\\u20b914,499\", \"\\u20b912,999\": \"\\u20b98,999\", \"\\u20b915,999\": \"\\u20b913,499\", \"\\u20b929,999\": \"\\u20b916,999\"}}"
+        "\u20b911,499": "lava bold n2 lite (nilgiri blue, 64 gb) 3 gb ram",
+        "spec_sections": "{\"battery & power features\": {\"battery capacity\": \"5000 mah\"}, \"general\": {\"brand\": \"lava\", \"in the box\": \"1 x handset, 1 x usb cable type-c, 1 x charger, 1 x sim ejector pin, 1 x back cover\", \"model number\": \"lzg415\", \"model name\": \"virat v1\", \"color\": \"nilgiri blue\", \"browse type\": \"smartphones\", \"sim type\": \"dual sim\", \"hybrid sim slot\": \"no\", \"touchscreen\": \"yes\", \"otg compatible\": \"yes\", \"headset present\": \"no\", \"phablet\": \"no\"}, \"display features\": {\"display size\": \"17.14 cm (6.75 inch)\", \"resolution\": \"720 x 1600 pixels\"}, \"os & processor features\": {\"operating system\": \"android 15\", \"processor brand\": \"unisoc\", \"processor core\": \"octa core\", \"primary clock speed\": \"2.6 ghz\"}, \"memory & storage features\": {\"internal storage\": \"64 gb\", \"ram\": \"4 gb\", \"memory card slot type\": \"dedicated slot\"}, \"camera features\": {\"primary camera\": \"13mp rear camera\", \"dual camera lens\": \"primary camera\"}, \"connectivity features\": {\"network type\": \"2g, 3g, 4g\", \"supported networks\": \"4g lte\"}, \"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\", \"warranty summary\": \"1 year manufacturer warranty for device and 6 months for in-box accessories\"}, \"manufacturer info\": {\"/\": \"virat v1 (nilgiri blue, 64 gb)\", \"12,999\": \"\\u20b99,999\", \"4.4\": \"location not set\", \"battery capacity\": \"5000 mah\", \"brand\": \"lava\", \"in the box\": \"1 x handset, 1 x usb cable type-c, 1 x charger, 1 x sim ejector pin, 1 x back cover\", \"model number\": \"lzg415\", \"model name\": \"virat v1\", \"color\": \"nilgiri blue\", \"browse type\": \"smartphones\", \"sim type\": \"dual sim\", \"hybrid sim slot\": \"no\", \"touchscreen\": \"yes\", \"otg compatible\": \"yes\", \"headset present\": \"no\", \"phablet\": \"no\", \"display size\": \"17.14 cm (6.75 inch)\", \"resolution\": \"720 x 1600 pixels\", \"operating system\": \"android 15\", \"processor brand\": \"unisoc\", \"processor core\": \"octa core\", \"primary clock speed\": \"2.6 ghz\", \"internal storage\": \"64 gb\", \"ram\": \"4 gb\", \"memory card slot type\": \"dedicated slot\", \"primary camera\": \"13mp rear camera\", \"dual camera lens\": \"primary camera\", \"network type\": \"2g, 3g, 4g\", \"supported networks\": \"4g lte\", \"generic name\": \"mobiles\", \"country of origin\": \"india\", \"name and address of the manufacturer\": \"lava international b-4, sector-63, noida-201301 u.p. india\", \"name and address of the packer\": \"lava international b-4, sector-63, noida-201301 u.p. india\", \"\\u20b927,999\": \"\\u20b919,999\", \"\\u20b917,499\": \"\\u20b914,499\", \"\\u20b915,499\": \"\\u20b911,499\", \"\\u20b912,999\": \"\\u20b98,999\", \"\\u20b915,999\": \"\\u20b913,499\", \"\\u20b929,999\": \"\\u20b916,999\", \"\\u20b911,499\": \"\\u20b99,299\"}}"
       },
       "fingerprint": {
         "category": "mobile",
@@ -494,12 +829,13 @@
           "name and address of the manufacturer": "lava international b-4, sector-63, noida-201301 u.p. india",
           "name and address of the packer": "lava international b-4, sector-63, noida-201301 u.p. india",
           "\u20b927,999": "similar products",
+          "\u20b917,499": "ai+ nova 2 5g (black, 128 gb) 4 gb ram",
           "\u20b915,499": "ai+ pulse 2 (green, 128 gb) 4 gb ram",
-          "\u20b917,499": "ai+ nova 2 5g (green, 128 gb) 4 gb ram",
           "\u20b912,999": "oppo a5x (laser white, 64 gb) 4 gb ram",
           "\u20b915,999": "lava virat v1 5g (sonar gold, 64 gb) 4 gb ram",
           "\u20b929,999": "realme c100x (golden coast, 64 gb) 4 gb ram",
-          "spec_sections": "{\"battery & power features\": {\"battery capacity\": \"5000 mah\"}, \"general\": {\"brand\": \"lava\", \"in the box\": \"1 x handset, 1 x usb cable type-c, 1 x charger, 1 x sim ejector pin, 1 x back cover\", \"model number\": \"lzg415\", \"model name\": \"virat v1\", \"color\": \"nilgiri blue\", \"browse type\": \"smartphones\", \"sim type\": \"dual sim\", \"hybrid sim slot\": \"no\", \"touchscreen\": \"yes\", \"otg compatible\": \"yes\", \"headset present\": \"no\", \"phablet\": \"no\"}, \"display features\": {\"display size\": \"17.14 cm (6.75 inch)\", \"resolution\": \"720 x 1600 pixels\"}, \"os & processor features\": {\"operating system\": \"android 15\", \"processor brand\": \"unisoc\", \"processor core\": \"octa core\", \"primary clock speed\": \"2.6 ghz\"}, \"memory & storage features\": {\"internal storage\": \"64 gb\", \"ram\": \"4 gb\", \"memory card slot type\": \"dedicated slot\"}, \"camera features\": {\"primary camera\": \"13mp rear camera\", \"dual camera lens\": \"primary camera\"}, \"connectivity features\": {\"network type\": \"2g, 3g, 4g\", \"supported networks\": \"4g lte\"}, \"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\", \"warranty summary\": \"1 year manufacturer warranty for device and 6 months for in-box accessories\"}, \"manufacturer info\": {\"/\": \"virat v1 (nilgiri blue, 64 gb)\", \"12,999\": \"\\u20b99,999\", \"4.4\": \"location not set\", \"battery capacity\": \"5000 mah\", \"brand\": \"lava\", \"in the box\": \"1 x handset, 1 x usb cable type-c, 1 x charger, 1 x sim ejector pin, 1 x back cover\", \"model number\": \"lzg415\", \"model name\": \"virat v1\", \"color\": \"nilgiri blue\", \"browse type\": \"smartphones\", \"sim type\": \"dual sim\", \"hybrid sim slot\": \"no\", \"touchscreen\": \"yes\", \"otg compatible\": \"yes\", \"headset present\": \"no\", \"phablet\": \"no\", \"display size\": \"17.14 cm (6.75 inch)\", \"resolution\": \"720 x 1600 pixels\", \"operating system\": \"android 15\", \"processor brand\": \"unisoc\", \"processor core\": \"octa core\", \"primary clock speed\": \"2.6 ghz\", \"internal storage\": \"64 gb\", \"ram\": \"4 gb\", \"memory card slot type\": \"dedicated slot\", \"primary camera\": \"13mp rear camera\", \"dual camera lens\": \"primary camera\", \"network type\": \"2g, 3g, 4g\", \"supported networks\": \"4g lte\", \"generic name\": \"mobiles\", \"country of origin\": \"india\", \"name and address of the manufacturer\": \"lava international b-4, sector-63, noida-201301 u.p. india\", \"name and address of the packer\": \"lava international b-4, sector-63, noida-201301 u.p. india\", \"\\u20b927,999\": \"\\u20b919,999\", \"\\u20b915,499\": \"\\u20b911,499\", \"\\u20b917,499\": \"\\u20b914,499\", \"\\u20b912,999\": \"\\u20b98,999\", \"\\u20b915,999\": \"\\u20b913,499\", \"\\u20b929,999\": \"\\u20b916,999\"}}"
+          "\u20b911,499": "lava bold n2 lite (nilgiri blue, 64 gb) 3 gb ram",
+          "spec_sections": "{\"battery & power features\": {\"battery capacity\": \"5000 mah\"}, \"general\": {\"brand\": \"lava\", \"in the box\": \"1 x handset, 1 x usb cable type-c, 1 x charger, 1 x sim ejector pin, 1 x back cover\", \"model number\": \"lzg415\", \"model name\": \"virat v1\", \"color\": \"nilgiri blue\", \"browse type\": \"smartphones\", \"sim type\": \"dual sim\", \"hybrid sim slot\": \"no\", \"touchscreen\": \"yes\", \"otg compatible\": \"yes\", \"headset present\": \"no\", \"phablet\": \"no\"}, \"display features\": {\"display size\": \"17.14 cm (6.75 inch)\", \"resolution\": \"720 x 1600 pixels\"}, \"os & processor features\": {\"operating system\": \"android 15\", \"processor brand\": \"unisoc\", \"processor core\": \"octa core\", \"primary clock speed\": \"2.6 ghz\"}, \"memory & storage features\": {\"internal storage\": \"64 gb\", \"ram\": \"4 gb\", \"memory card slot type\": \"dedicated slot\"}, \"camera features\": {\"primary camera\": \"13mp rear camera\", \"dual camera lens\": \"primary camera\"}, \"connectivity features\": {\"network type\": \"2g, 3g, 4g\", \"supported networks\": \"4g lte\"}, \"warranty\": {\"flipkart\": \"a one-stop shopping\", \"minutes\": \"everything in minutes\", \"grocery\": \"at wholesale prices\", \"travel\": \"all your travel needs\", \"warranty summary\": \"1 year manufacturer warranty for device and 6 months for in-box accessories\"}, \"manufacturer info\": {\"/\": \"virat v1 (nilgiri blue, 64 gb)\", \"12,999\": \"\\u20b99,999\", \"4.4\": \"location not set\", \"battery capacity\": \"5000 mah\", \"brand\": \"lava\", \"in the box\": \"1 x handset, 1 x usb cable type-c, 1 x charger, 1 x sim ejector pin, 1 x back cover\", \"model number\": \"lzg415\", \"model name\": \"virat v1\", \"color\": \"nilgiri blue\", \"browse type\": \"smartphones\", \"sim type\": \"dual sim\", \"hybrid sim slot\": \"no\", \"touchscreen\": \"yes\", \"otg compatible\": \"yes\", \"headset present\": \"no\", \"phablet\": \"no\", \"display size\": \"17.14 cm (6.75 inch)\", \"resolution\": \"720 x 1600 pixels\", \"operating system\": \"android 15\", \"processor brand\": \"unisoc\", \"processor core\": \"octa core\", \"primary clock speed\": \"2.6 ghz\", \"internal storage\": \"64 gb\", \"ram\": \"4 gb\", \"memory card slot type\": \"dedicated slot\", \"primary camera\": \"13mp rear camera\", \"dual camera lens\": \"primary camera\", \"network type\": \"2g, 3g, 4g\", \"supported networks\": \"4g lte\", \"generic name\": \"mobiles\", \"country of origin\": \"india\", \"name and address of the manufacturer\": \"lava international b-4, sector-63, noida-201301 u.p. india\", \"name and address of the packer\": \"lava international b-4, sector-63, noida-201301 u.p. india\", \"\\u20b927,999\": \"\\u20b919,999\", \"\\u20b917,499\": \"\\u20b914,499\", \"\\u20b915,499\": \"\\u20b911,499\", \"\\u20b912,999\": \"\\u20b98,999\", \"\\u20b915,999\": \"\\u20b913,499\", \"\\u20b929,999\": \"\\u20b916,999\", \"\\u20b911,499\": \"\\u20b99,299\"}}"
         }
       },
       "offers": [
@@ -518,7 +854,7 @@
           "quality_status": "VALID",
           "quality_score": 95,
           "quality_flags": [],
-          "observed_at": "2026-09-04T16:27:48.544411Z"
+          "observed_at": "2026-09-04T16:40:45.633212Z"
         }
       ],
       "review_candidates": [],
@@ -529,5 +865,5 @@
       "savings_paise": 0
     }
   ],
-  "generated_at": "2026-09-04T16:27:48.616190Z"
+  "generated_at": "2026-09-04T16:40:45.715585Z"
 }

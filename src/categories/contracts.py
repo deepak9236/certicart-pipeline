@@ -1,10 +1,10 @@
 """Contracts shared by every product category."""
 
-from typing import TypeAlias
+from typing import Any, TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-AttributeValue: TypeAlias = str | int | float | bool
+AttributeValue: TypeAlias = str | int | float | bool | dict[str, Any] | list[Any]
 
 
 class SubcategoryDefinition(BaseModel):

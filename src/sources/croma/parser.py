@@ -19,6 +19,111 @@ from sources.common import (
 from sources.contracts import ParsedProduct, RawSourceRecord
 
 
+def extract_croma_specs(
+    sel: Selector,
+) -> tuple[dict[str, str], dict[str, dict[str, str]]]:
+    """Extract flat specs dictionary and section-organized specs hierarchy from Croma HTML."""
+    specs: dict[str, str] = {}
+    sections: dict[str, dict[str, str]] = {}
+
+    # 1. Accordion Specification Containers (.cp-specification, .cp-specification-info)
+    spec_info_blocks = sel.css(
+        "ul.cp-specification-info, "
+        "div.cp-specification ul.cp-specification-info, "
+        "#specification_container ul.cp-specification-info"
+    )
+    for block in spec_info_blocks:
+        heading_el = (
+            block.css("li h3.title::text").get()
+            or block.css("h3.title::text").get()
+            or block.css(".title::text").get()
+            or block.css("h3::text").get()
+        )
+        section_name = heading_el.strip() if heading_el else ""
+        if not section_name:
+            continue
+        section_specs: dict[str, str] = {}
+
+        for title_el in block.css(".cp-specification-spec-title"):
+            key_text = (
+                title_el.css("h4::text").get() or title_el.css("::text").get() or ""
+            ).strip()
+            v_pieces = title_el.xpath(
+                "following-sibling::*[contains(@class, 'cp-specification-spec-details')][1]//text()"
+            ).getall()
+            if not v_pieces:
+                v_pieces = title_el.xpath(
+                    "../li[contains(@class, 'cp-specification-spec-details')]//text()"
+                ).getall()
+            val_text = re.sub(r"\s+", " ", " ".join(v_pieces)).strip()
+
+            if key_text and val_text:
+                k_clean = normalize_text(key_text)
+                specs[k_clean] = val_text
+                section_specs[key_text] = val_text
+
+        if section_specs:
+            sections[section_name] = section_specs
+
+    # 2. Standalone specification rows if any were outside the blocks
+    for spec_row in sel.css("ul.cp-specification-spec-info"):
+        key_el = (
+            spec_row.css("li.cp-specification-spec-title h4::text").get()
+            or spec_row.css("li.cp-specification-spec-title::text").get()
+            or spec_row.css(".cp-specification-spec-title h4::text").get()
+            or spec_row.css(".cp-specification-spec-title::text").get()
+        )
+        details_el = spec_row.css(
+            "li.cp-specification-spec-details, .cp-specification-spec-details"
+        )
+        val_text = " ".join(details_el.xpath(".//text()").getall()).strip()
+        val_text = re.sub(r"\s+", " ", val_text)
+        if key_el and val_text:
+            k_clean = normalize_text(key_el)
+            if k_clean not in specs:
+                specs[k_clean] = val_text
+
+    # 3. Key Features bullet points (#panel5, .cp-keyfeature)
+    key_features = sel.css("div.cp-keyfeature ul li, .cp-keyfeature li, #panel5 li")
+    kf_dict: dict[str, str] = {}
+    for idx, li in enumerate(key_features, 1):
+        text = " ".join(li.xpath(".//text()").getall()).strip()
+        text = re.sub(r"\s+", " ", text)
+        if not text:
+            continue
+        if ":" in text:
+            k, v = text.split(":", 1)
+            k_clean = normalize_text(k)
+            if k_clean not in specs:
+                specs[k_clean] = v.strip()
+            kf_dict[k.strip()] = v.strip()
+        else:
+            kf_dict[f"Feature {idx}"] = text
+    if kf_dict:
+        sections["Key Features"] = kf_dict
+
+    # 4. Overview Section (#panel1, .cp-overview)
+    overview_el = sel.css("div.cp-overview, #panel1 .cp-overview")
+    if overview_el:
+        overview_text = " ".join(overview_el.xpath(".//text()").getall()).strip()
+        overview_text = re.sub(r"\s+", " ", overview_text)
+        if overview_text:
+            sections["Overview"] = {"Description": overview_text}
+
+    # 5. Legacy / Alternative Croma table structure (e.g. .spec-body tr, .technical-details tr)
+    for item in sel.css(
+        ".cp-specification li, .spec-body tr, .technical-details tr, table.specifications tr"
+    ):
+        key_el = item.css(".spec-title::text, td:first-child::text, .key::text").get()
+        val_el = item.css(".spec-desc::text, td:last-child::text, .value::text").get()
+        if key_el and val_el:
+            k_clean = normalize_text(key_el)
+            if k_clean not in specs:
+                specs[k_clean] = val_el.strip()
+
+    return specs, sections
+
+
 def parse_croma_payload(
     payload: dict[str, object],
     source_url: AnyHttpUrl,
@@ -106,6 +211,12 @@ def parse_croma_payload(
         if isinstance(raw_data, dict):
             initial_data_product = raw_data
 
+    # Extract DOM specs and sections
+    specs_from_dom, sections = extract_croma_specs(sel) if sel else ({}, {})
+    specs: dict[str, str] = dict(specs_from_classifications)
+    for k, v in specs_from_dom.items():
+        specs[k] = v
+
     # Title
     title = ""
     if initial_data_product.get("name"):
@@ -136,6 +247,11 @@ def parse_croma_payload(
                 .replace("Online", "")
                 .strip()
             )
+
+    if not title and (specs.get("brand") or specs.get("model series") or specs.get("model number")):
+        b = specs.get("brand", "")
+        m = specs.get("model series") or specs.get("model number", "")
+        title = f"{b} {m}".strip()
 
     if not title:
         title = str(payload.get("title", f"Croma Product {source_product_id}"))
@@ -268,15 +384,6 @@ def parse_croma_payload(
             if rev_match:
                 review_count = int(rev_match.group(1))
 
-    # Specifications
-    specs: dict[str, str] = dict(specs_from_classifications)
-    if sel:
-        for item in sel.css(".cp-specification li, .spec-body tr, .technical-details tr"):
-            key_el = item.css(".spec-title::text, td:first-child::text, .key::text").get()
-            val_el = item.css(".spec-desc::text, td:last-child::text, .value::text").get()
-            if key_el and val_el:
-                specs[normalize_text(key_el)] = val_el.strip()
-
     brand = infer_brand(
         title,
         str(initial_data_product.get("manufacturer") or "")
@@ -294,6 +401,8 @@ def parse_croma_payload(
     )
 
     attributes = build_category_attributes(category, title, specs)
+    if sections:
+        attributes["spec_sections"] = sections
 
     if "ssd" in title.casefold() or any("ssd" in str(v).casefold() for v in specs.values()):
         attributes["storage_type"] = "SSD"
@@ -312,6 +421,14 @@ def parse_croma_payload(
     if ean:
         attributes["ean"] = str(ean).strip()
         attributes["gtin"] = str(ean).strip()
+
+    warranty = (
+        specs.get("warranty on main product")
+        or specs.get("warranty")
+        or specs.get("standard warranty includes")
+    )
+    if warranty:
+        attributes["warranty"] = str(warranty).strip()
 
     return ParsedProduct(
         source="croma",

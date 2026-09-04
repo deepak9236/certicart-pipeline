@@ -68,4 +68,4 @@ class LaptopAttributes(BaseModel):
     def to_attribute_dict(self) -> dict[str, AttributeValue]:
         """Convert validated model to standard flat attribute dictionary."""
         data: dict[str, Any] = self.model_dump(exclude_none=True)
-        return {k: v for k, v in data.items() if isinstance(v, (str, int, float, bool))}
+        return {k: v for k, v in data.items() if isinstance(v, (str, int, float, bool, dict, list))}

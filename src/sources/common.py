@@ -177,8 +177,16 @@ def build_category_attributes(
                     attributes["storage_gb"] = normalize_capacity_gb(st_match.group(1))
 
         # Extract CPU
-        if "processor name" in norm_specs or "cpu model" in norm_specs:
-            p_name = norm_specs.get("processor name") or norm_specs.get("cpu model", "")
+        if (
+            "processor name" in norm_specs
+            or "cpu model" in norm_specs
+            or "processor type" in norm_specs
+        ):
+            p_name = (
+                norm_specs.get("processor name")
+                or norm_specs.get("cpu model")
+                or norm_specs.get("processor type", "")
+            )
             p_var = norm_specs.get("processor variant", "")
             p_brand = norm_specs.get("processor brand", "")
             full_cpu = f"{p_name} {p_var}".strip()
@@ -222,6 +230,7 @@ def build_category_attributes(
             "graphics coprocessor",
             "graphics card description",
             "gpu",
+            "gpu model",
             "graphics",
             "dedicated graphic memory capacity",
             "dedicated graphic card",
@@ -249,8 +258,10 @@ def build_category_attributes(
         for sc_key in (
             "screen size",
             "display size",
-            "screen size (in cm)",
+            "display size (in inches)",
             "screen size (in inches)",
+            "screen size (in cm)",
+            "display size (in cms)",
             "screen dimensions",
         ):
             if sc_key in norm_specs:
@@ -276,39 +287,76 @@ def build_category_attributes(
                     attributes["screen_size_inches"] = float(sc_match.group(1))
 
         # Additional Laptop fields
-        if "ram type" in norm_specs:
-            attributes["ram_type"] = norm_specs["ram type"].upper()
+        for rt_key in ("ram type", "type of ram", "memory technology"):
+            if rt_key in norm_specs:
+                attributes["ram_type"] = norm_specs[rt_key].upper()
+                break
+
         if "operating system" in norm_specs:
             attributes["operating_system"] = norm_specs["operating system"].strip()
-        if "color" in norm_specs:
+        elif "os" in norm_specs:
+            attributes["operating_system"] = norm_specs["os"].strip()
+
+        if "brand color" in norm_specs:
+            attributes["color"] = norm_specs["brand color"].strip()
+        elif "color" in norm_specs:
             attributes["color"] = norm_specs["color"].strip()
+
+        if "display type" in norm_specs:
+            dt_val = norm_specs["display type"].lower()
+            if "oled" in dt_val:
+                attributes["display_type"] = "OLED"
+            elif "ips" in dt_val:
+                attributes["display_type"] = "IPS LCD"
+
         if "backlit keyboard" in norm_specs:
             b_val = norm_specs["backlit keyboard"].lower()
             if b_val in ("yes", "true", "1"):
                 attributes["keyboard_backlight"] = True
             elif b_val in ("no", "false", "0"):
                 attributes["keyboard_backlight"] = False
-        elif "keyboard" in norm_specs and "backlit" in norm_specs["keyboard"].lower():
+        elif (
+            "type of keyboard" in norm_specs and "backlit" in norm_specs["type of keyboard"].lower()
+        ) or ("keyboard" in norm_specs and "backlit" in norm_specs["keyboard"].lower()):
             attributes["keyboard_backlight"] = True
 
-        if "web camera" in norm_specs:
-            w_val = norm_specs["web camera"].lower()
-            if "1080p" in w_val or "fhd" in w_val:
-                attributes["webcam_resolution"] = "1080p FHD"
-            elif "720p" in w_val or "hd" in w_val:
-                attributes["webcam_resolution"] = "720p HD"
+        for cam_key in (
+            "web camera",
+            "camera resolution",
+            "camera",
+            "webcam",
+            "laptop camera type",
+        ):
+            if cam_key in norm_specs:
+                w_val = norm_specs[cam_key].lower()
+                if "1080p" in w_val or "fhd" in w_val:
+                    attributes["webcam_resolution"] = "1080p FHD"
+                    break
+                elif "720p" in w_val or "hd" in w_val:
+                    attributes["webcam_resolution"] = "720p HD"
+                    break
 
-        if "weight" in norm_specs:
-            w_m = re.search(r"(\d+(?:\.\d+)?)\s*kg", norm_specs["weight"].lower())
-            if w_m:
-                with contextlib.suppress(ValueError):
-                    weight_float = float(w_m.group(1))
-                    if 0.5 <= weight_float <= 10.0:
-                        attributes["weight_kg"] = weight_float
+        for w_key in ("weight", "product weight", "item weight"):
+            if w_key in norm_specs:
+                w_m = re.search(r"(\d+(?:\.\d+)?)\s*kg", norm_specs[w_key].lower())
+                if w_m:
+                    with contextlib.suppress(ValueError):
+                        weight_float = float(w_m.group(1))
+                        if 0.5 <= weight_float <= 10.0:
+                            attributes["weight_kg"] = weight_float
+                            break
 
-        for b_key in ("battery cell", "battery", "battery capacity"):
+        for b_key in (
+            "battery cell",
+            "battery",
+            "battery capacity",
+            "standard battery life",
+            "laptop battery",
+        ):
             if b_key in norm_specs:
-                b_m = re.search(r"(\d{2,3}(?:\.\d)?)\s*wh", norm_specs[b_key].lower())
+                b_m = re.search(
+                    r"(\d{2,3}(?:\.\d)?)\s*(?:wh|watt\s*hours)", norm_specs[b_key].lower()
+                )
                 if b_m:
                     with contextlib.suppress(ValueError):
                         battery_wh_float = float(b_m.group(1))
@@ -316,18 +364,33 @@ def build_category_attributes(
                             attributes["battery_wh"] = battery_wh_float
                             break
 
-        if "wireless lan" in norm_specs:
-            w_lan = norm_specs["wireless lan"].lower()
-            if "wi-fi 7" in w_lan or "wifi 7" in w_lan:
-                attributes["wifi_standard"] = "Wi-Fi 7"
-            elif "wi-fi 6e" in w_lan or "wifi 6e" in w_lan:
-                attributes["wifi_standard"] = "Wi-Fi 6E"
-            elif "wi-fi 6" in w_lan or "wifi 6" in w_lan:
-                attributes["wifi_standard"] = "Wi-Fi 6"
-            elif "wi-fi 5" in w_lan or "wifi 5" in w_lan or "802.11ac" in w_lan:
-                attributes["wifi_standard"] = "Wi-Fi 5"
+        for wlan_key in (
+            "wireless lan",
+            "wifi specifications",
+            "wi-fi specifications",
+            "network connectivity",
+        ):
+            if wlan_key in norm_specs:
+                w_lan = norm_specs[wlan_key].lower()
+                if "wi-fi 7" in w_lan or "wifi 7" in w_lan:
+                    attributes["wifi_standard"] = "Wi-Fi 7"
+                    break
+                elif "wi-fi 6e" in w_lan or "wifi 6e" in w_lan:
+                    attributes["wifi_standard"] = "Wi-Fi 6E"
+                    break
+                elif "wi-fi 6" in w_lan or "wifi 6" in w_lan:
+                    attributes["wifi_standard"] = "Wi-Fi 6"
+                    break
+                elif "wi-fi 5" in w_lan or "wifi 5" in w_lan or "802.11ac" in w_lan:
+                    attributes["wifi_standard"] = "Wi-Fi 5"
+                    break
 
-        for res_key in ("screen resolution", "screen resolution type", "display resolution"):
+        for res_key in (
+            "screen resolution",
+            "screen resolution type",
+            "display resolution",
+            "additional screen specifications",
+        ):
             if res_key in norm_specs:
                 r_val = norm_specs[res_key].lower()
                 if "4k" in r_val or "3840" in r_val:
@@ -338,6 +401,9 @@ def build_category_attributes(
                     break
                 if "2.5k" in r_val or "2560" in r_val:
                     attributes["display_resolution"] = "2.5K QHD"
+                    break
+                if "wuxga" in r_val or "1920 x 1200" in r_val or "1920x1200" in r_val:
+                    attributes["display_resolution"] = "WUXGA"
                     break
                 if "1080" in r_val or "fhd" in r_val or "full hd" in r_val:
                     attributes["display_resolution"] = "FHD"

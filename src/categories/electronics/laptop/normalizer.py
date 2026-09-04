@@ -274,7 +274,14 @@ class LaptopIdentityNormalizer:
             return intel_arc.group(1).strip()
 
         if specs:
-            for k in ("graphic processor", "graphics processor", "graphics", "gpu", "gpu_model"):
+            for k in (
+                "graphic processor",
+                "graphics processor",
+                "graphics",
+                "gpu",
+                "gpu model",
+                "gpu_model",
+            ):
                 if k in specs and specs[k].strip():
                     return specs[k].casefold().strip()
 
@@ -307,28 +314,35 @@ class LaptopIdentityNormalizer:
     def extract_storage_gb(cls, title: str, specs: dict[str, str] | None = None) -> int | None:
         title_lower = title.casefold()
 
-        # Terabyte checks
-        tb_match = re.search(r"\b([1248])\s*tb(?:\s+(?:ssd|nvme|hdd))?\b", title_lower)
+        # TB matches (e.g. 1TB, 2TB) -> GB
+        tb_match = re.search(r"\b([1-4])\s*tb\b", title_lower)
         if tb_match:
             return int(tb_match.group(1)) * 1024
 
-        # Gigabyte checks
-        gb_match = re.findall(
-            r"\b(\d{2,4})\s*gb(?:\s+(?:ssd|nvme|emmc|rom|hdd|storage))?\b", title_lower
-        )
-        for m in gb_match:
+        # GB matches (e.g. 256GB, 512GB, 128GB, 64GB)
+        gb_matches = re.findall(r"\b(\d{2,4})\s*gb\b", title_lower)
+        for m in gb_matches:
             val = int(m)
             if val in (32, 64, 128, 256, 512, 1024, 2048):
                 return val
 
-        if specs and "storage" in specs:
-            clean_s = specs["storage"].casefold()
-            tb_m = re.search(r"(\d+)\s*tb", clean_s)
-            if tb_m:
-                return int(tb_m.group(1)) * 1024
-            gb_m = re.search(r"(\d+)\s*gb", clean_s)
-            if gb_m:
-                return int(gb_m.group(1))
+        if specs:
+            for k in (
+                "storage",
+                "ssd capacity",
+                "hdd capacity",
+                "hard disk size",
+                "storage capacity",
+            ):
+                if k in specs:
+                    raw = specs[k].casefold()
+                    if "tb" in raw:
+                        tb_m = re.search(r"(\d+)\s*tb", raw)
+                        if tb_m:
+                            return int(tb_m.group(1)) * 1024
+                    gb_m = re.search(r"(\d+)\s*gb", raw)
+                    if gb_m:
+                        return int(gb_m.group(1))
 
         return None
 
@@ -354,8 +368,10 @@ class LaptopIdentityNormalizer:
             for k in (
                 "screen size",
                 "display size",
-                "screen size (in cm)",
+                "display size (in inches)",
                 "screen size (in inches)",
+                "screen size (in cm)",
+                "display size (in cms)",
                 "screen dimensions",
             ):
                 if k in specs:
