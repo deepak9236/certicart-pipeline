@@ -513,7 +513,9 @@ class MobileIdentityNormalizer:
         ).strip()
 
         # Build and validate through MobileAttributes Pydantic schema
-        extra = dict(extra_attributes or {})
+        from sources.common import is_ignored_spec_key
+
+        extra = {k: v for k, v in (extra_attributes or {}).items() if not is_ignored_spec_key(k)}
         for explicit_k in (
             "ram_gb",
             "storage_gb",

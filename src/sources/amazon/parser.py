@@ -15,8 +15,118 @@ from sources.common import (
     build_category_attributes,
     extract_digits_to_paise,
     infer_brand,
+    is_ignored_spec_key,
 )
 from sources.contracts import ParsedProduct, RawSourceRecord
+
+
+def extract_amazon_specs(
+    sel: Selector,
+) -> tuple[dict[str, str], dict[str, dict[str, str]]]:
+    """Extract flat specs dictionary and section-organized specs hierarchy from Amazon HTML."""
+    specs: dict[str, str] = {}
+    sections: dict[str, dict[str, str]] = {}
+
+    # 1. Expander section tables (#productDetails_expanderSectionTables,
+    # depthLeftSections, depthRightSections)
+    expander_containers = sel.css(
+        "#productDetails_expanderSectionTables .a-section-expander-container, "
+        "#prodDetails .a-section-expander-container, "
+        "div.a-section-expander-container"
+    )
+    for container in expander_containers:
+        heading_el = (
+            container.css(".a-expander-prompt::text").get()
+            or container.css(".a-expander-header span::text").get()
+            or container.css(".a-expander-header::text").get()
+        )
+        section_name = heading_el.strip() if heading_el else ""
+        if not section_name:
+            continue
+        section_name_clean = normalize_text(section_name)
+        if any(
+            ignored in section_name_clean
+            for ignored in ("feedback", "customer review", "rating", "lower price")
+        ):
+            continue
+
+        section_specs: dict[str, str] = {}
+        for row in container.css("table.prodDetTable tr, table.a-keyvalue tr"):
+            key_el = (
+                row.css("th.prodDetSectionEntry::text").get()
+                or row.css("th::text").get()
+                or row.css("td:first-child::text").get()
+            )
+            val_el = (
+                row.css("td.prodDetAttrValue::text").get()
+                or row.css("td.prodDetAttrValue *::text").get()
+                or row.css("td:last-child::text").get()
+            )
+            if not val_el:
+                v_pieces = row.css("td.prodDetAttrValue *::text, td:last-child *::text").getall()
+                if v_pieces:
+                    val_el = " ".join(v_pieces)
+
+            if key_el and val_el:
+                key_clean = key_el.strip()
+                val_clean = re.sub(r"\s+", " ", val_el).strip()
+                if is_ignored_spec_key(key_clean):
+                    continue
+                k_norm = normalize_text(key_clean)
+                specs[k_norm] = val_clean
+                section_specs[key_clean] = val_clean
+
+        if section_specs:
+            sections[section_name] = section_specs
+
+    # 2. Classic product details tables (e.g. #productDetails_techSpec_section_1, #poExpander)
+    for row in sel.css(
+        "#productDetails_techSpec_section_1 tr, "
+        "#productDetails_techSpec_section_2 tr, "
+        "#prodDetails table.prodDetTable tr, "
+        "#poExpander tr, "
+        "#technicalSpecifications_section_1 tr, "
+        "#productOverview_feature_div tr"
+    ):
+        key_el = (
+            row.css("th::text").get()
+            or row.css("td.a-span3 span::text").get()
+            or row.css("td.a-span3::text").get()
+            or row.css("td:first-child span::text").get()
+            or row.css("td:first-child::text").get()
+        )
+        val_el = (
+            row.css("td::text").get()
+            or row.css("td.a-span9 span::text").get()
+            or row.css("td.a-span9::text").get()
+            or row.css("td:last-child span::text").get()
+            or row.css("td:last-child::text").get()
+        )
+        if not val_el:
+            v_pieces = row.css("td.a-span9 *::text, td:last-child *::text").getall()
+            if v_pieces:
+                val_el = " ".join(v_pieces)
+
+        if key_el and val_el:
+            key_clean = key_el.strip()
+            val_clean = re.sub(r"\s+", " ", val_el).strip()
+            if not is_ignored_spec_key(key_clean):
+                k_norm = normalize_text(key_clean)
+                if k_norm not in specs:
+                    specs[k_norm] = val_clean
+
+    # 3. Bullet specifications (#detailBullets_feature_div)
+    for li in sel.css("#detailBullets_feature_div li span.a-list-item"):
+        parts = [p.strip() for p in li.css("span::text").getall() if p.strip()]
+        if len(parts) >= 2:
+            key_clean = parts[0].replace(":", "").strip()
+            val_clean = re.sub(r"\s+", " ", parts[1]).strip()
+            if not is_ignored_spec_key(key_clean):
+                k_norm = normalize_text(key_clean)
+                if k_norm not in specs:
+                    specs[k_norm] = val_clean
+
+    return specs, sections
 
 
 def parse_amazon_payload(
@@ -48,11 +158,16 @@ def parse_amazon_payload(
             except (json.JSONDecodeError, TypeError):
                 continue
 
+    # Extract Specifications and Sections
+    specs, sections = extract_amazon_specs(sel) if sel else ({}, {})
+
     # Title
     title = ""
     if sel:
         title = (
-            sel.css("span#productTitle::text").get()
+            sel.css("input#productTitle::attr(value)").get()
+            or sel.css("input[name='productTitle']::attr(value)").get()
+            or sel.css("span#productTitle::text").get()
             or sel.css("h1#title::text").get()
             or sel.css("meta[name='title']::attr(content)").get()
             or sel.css("meta[property='og:title']::attr(content)").get()
@@ -65,6 +180,10 @@ def parse_amazon_payload(
         raw_page_title = sel.css("title::text").get()
         if raw_page_title and "page not found" not in raw_page_title.casefold():
             title = raw_page_title.split(":")[0].split("|")[0].strip()
+    if not title and (specs.get("brand name") or specs.get("brand") or specs.get("model name")):
+        b = specs.get("brand name") or specs.get("brand", "")
+        m = specs.get("model name") or specs.get("model number", "")
+        title = f"{b} {m}".strip()
     if not title:
         title = str(payload.get("title", f"Amazon Product {source_product_id}"))
 
@@ -73,24 +192,34 @@ def parse_amazon_payload(
     mrp_paise: int | None = None
 
     if sel:
-        offscreen_prices = [
-            p.strip()
-            for p in sel.css("span.a-price span.a-offscreen::text").getall()
-            if p.strip() and "₹" in p
-        ]
-        whole_price = (
-            sel.css("span.priceToPay span.a-price-whole::text").get()
-            or sel.css("span.a-price span.a-price-whole::text").get()
-            or sel.css("div#corePriceDisplay_desktop_feature_div span.a-price-whole::text").get()
+        price_input = (
+            sel.css("input#priceValue::attr(value)").get()
+            or sel.css("input[name='priceValue']::attr(value)").get()
         )
-        price_text = (
-            (offscreen_prices[0] if offscreen_prices else None)
-            or whole_price
-            or sel.css("span.priceToPay span.a-offscreen::text").get()
-            or sel.css("span.apexPriceToPay span.a-offscreen::text").get()
-            or sel.css("div#corePrice_desktop span.a-offscreen::text").get()
-        )
-        price_paise = extract_digits_to_paise(price_text)
+        if price_input:
+            price_paise = extract_digits_to_paise(price_input)
+
+        if price_paise is None:
+            offscreen_prices = [
+                p.strip()
+                for p in sel.css("span.a-price span.a-offscreen::text").getall()
+                if p.strip() and "₹" in p
+            ]
+            whole_price = (
+                sel.css("span.priceToPay span.a-price-whole::text").get()
+                or sel.css("span.a-price span.a-price-whole::text").get()
+                or sel.css(
+                    "div#corePriceDisplay_desktop_feature_div span.a-price-whole::text"
+                ).get()
+            )
+            price_text = (
+                (offscreen_prices[0] if offscreen_prices else None)
+                or whole_price
+                or sel.css("span.priceToPay span.a-offscreen::text").get()
+                or sel.css("span.apexPriceToPay span.a-offscreen::text").get()
+                or sel.css("div#corePrice_desktop span.a-offscreen::text").get()
+            )
+            price_paise = extract_digits_to_paise(price_text)
 
         mrp_text = (
             sel.css("span.basisPrice span.a-offscreen::text").get()
@@ -165,42 +294,62 @@ def parse_amazon_payload(
     rating: float | None = None
     review_count: int | None = None
     if sel:
-        rating_text = sel.css("span.a-icon-alt::text, i.a-icon-star span::text").get()
+        rating_text = (
+            sel.css("#averageCustomerReviews span.a-size-small.a-color-base::text").get()
+            or sel.css("span.a-icon-alt::text, i.a-icon-star span::text").get()
+        )
         if rating_text:
-            match = re.search(r"(\d+(?:\.\d+)?)\s*out of 5", rating_text)
+            match = re.search(r"(\d+(?:\.\d+)?)", rating_text)
             if match:
                 with contextlib.suppress(ValueError):
                     rating = float(match.group(1))
-        rev_text = sel.css("span#acrCustomerReviewText::text").get()
+        rev_text = (
+            sel.css("span#acrCustomerReviewText::text").get()
+            or sel.css("#averageCustomerReviews a[href*='customerReviews'] span::text").get()
+        )
         if rev_text:
             rev_match = re.search(r"([\d,]+)", rev_text)
             if rev_match:
                 review_count = int(rev_match.group(1).replace(",", ""))
 
-    # Specifications
-    specs: dict[str, str] = {}
-    if sel:
-        spec_selector = (
-            "#productDetails_techSpec_section_1 tr, #poExpander tr, "
-            "#technicalSpecifications_section_1 tr"
-        )
-        for row in sel.css(spec_selector):
-            key_el = row.css("th::text, td.a-span3 span::text, td:first-child::text").get()
-            val_el = row.css("td::text, td.a-span9 span::text, td:last-child::text").get()
-            if key_el and val_el:
-                specs[normalize_text(key_el)] = val_el.strip()
-
-        for li in sel.css("#detailBullets_feature_div li span.a-list-item"):
-            parts = [p.strip() for p in li.css("span::text").getall() if p.strip()]
-            if len(parts) >= 2:
-                specs[normalize_text(parts[0].replace(":", ""))] = parts[1].strip()
-
     brand = infer_brand(
-        title, specs.get("brand") or specs.get("manufacturer") or specs.get("brand name")
+        title,
+        specs.get("brand")
+        or specs.get("brand name")
+        or specs.get("manufacturer")
+        or specs.get("manufacturer name"),
     )
     model_name = specs.get("model name") or specs.get("model") or specs.get("series") or title
 
     attributes = build_category_attributes(category, title, specs)
+    if sections:
+        attributes["spec_sections"] = sections
+
+    # Identifiers & Warranty
+    asin_val = (
+        (
+            sel.css("input#asin::attr(value)").get()
+            or sel.css("input[name='asin']::attr(value)").get()
+        )
+        if sel
+        else None
+    ) or specs.get("asin")
+    if asin_val:
+        attributes["asin"] = str(asin_val).strip()
+
+    mpn = (
+        specs.get("manufacturer part number")
+        or specs.get("part number")
+        or specs.get("model number")
+    )
+    if mpn:
+        attributes["mpn"] = str(mpn).strip()
+
+    warranty = (
+        specs.get("warranty description") or specs.get("warranty") or specs.get("warranty type")
+    )
+    if warranty:
+        attributes["warranty"] = str(warranty).strip()
 
     return ParsedProduct(
         source="amazon",

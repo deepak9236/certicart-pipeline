@@ -81,6 +81,10 @@ class MobileAttributes(BaseModel):
     gtin: str | None = Field(default=None, description="Global Trade Item Number")
     ean: str | None = Field(default=None, description="European Article Number")
     asin: str | None = Field(default=None, description="Amazon Standard Identification Number")
+    warranty: str | None = Field(default=None, description="Product warranty terms")
+    spec_sections: dict[str, Any] | str | None = Field(
+        default=None, description="Hierarchical specification categories"
+    )
 
     def to_attribute_dict(self) -> dict[str, AttributeValue]:
         """Convert validated model to standard flat attribute dictionary."""

@@ -186,3 +186,218 @@ def test_amazon_parser_json_ld_list_and_fallbacks() -> None:
     assert parsed.price_paise == 8900000
     assert parsed.mrp_paise == 9900000
     assert parsed.seller == "Cloudtail"
+
+
+def test_amazon_detailed_expander_specifications_html() -> None:
+    html = """
+    <div id="productDetails_feature_div">
+        <div id="prodDetails">
+            <h1>Product information</h1>
+            <div id="productDetails_expanderSectionTables">
+                <div class="a-section-expander-container">
+                    <span class="a-expander-prompt">Additional details</span>
+                    <table class="prodDetTable">
+                        <tr>
+                            <th class="prodDetSectionEntry">Colour</th>
+                            <td class="prodDetAttrValue">Cool Silver</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Hard Drive Size</th>
+                            <td class="prodDetAttrValue">512 GB</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Operating System</th>
+                            <td class="prodDetAttrValue">Windows 11 Home</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">
+                                Other Special Features of the Product
+                            </th>
+                            <td class="prodDetAttrValue">
+                                Anti-glare display, Backlit Keyboard, FHD camera
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Graphics Description</th>
+                            <td class="prodDetAttrValue">Integrated</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Hard Disk Description</th>
+                            <td class="prodDetAttrValue">SSD</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Item Weight</th>
+                            <td class="prodDetAttrValue">1 kg 880 g</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Warranty Type</th>
+                            <td class="prodDetAttrValue">Limited</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="a-section-expander-container">
+                    <span class="a-expander-prompt">Display</span>
+                    <table class="prodDetTable">
+                        <tr>
+                            <th class="prodDetSectionEntry">Screen Size</th>
+                            <td class="prodDetAttrValue">16 Inches</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Maximum Display Resolution</th>
+                            <td class="prodDetAttrValue">1920 x 1200 Pixels</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Maximum Display Brightness</th>
+                            <td class="prodDetAttrValue">300 Nit</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="a-section-expander-container">
+                    <span class="a-expander-prompt">Connectivity</span>
+                    <table class="prodDetTable">
+                        <tr>
+                            <th class="prodDetSectionEntry">Wireless Technology</th>
+                            <td class="prodDetAttrValue">Wi-Fi</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Computer Wireless Type</th>
+                            <td class="prodDetAttrValue">802.11ax</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Wi-Fi Generation</th>
+                            <td class="prodDetAttrValue">Wi-Fi 6</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="a-section-expander-container">
+                    <span class="a-expander-prompt">Battery</span>
+                    <table class="prodDetTable">
+                        <tr>
+                            <th class="prodDetSectionEntry">Battery Cell Type</th>
+                            <td class="prodDetAttrValue">Lithium Ion</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Battery Life</th>
+                            <td class="prodDetAttrValue">8 Hours</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">
+                                Lithium Battery Energy Content
+                            </th>
+                            <td class="prodDetAttrValue">42 Watt Hours</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="a-section-expander-container">
+                    <span class="a-expander-prompt">Processor</span>
+                    <table class="prodDetTable">
+                        <tr>
+                            <th class="prodDetSectionEntry">Processor Type</th>
+                            <td class="prodDetAttrValue">Intel Core Ultra 5</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">CPU Model Number</th>
+                            <td class="prodDetAttrValue">Intel Core Ultra 5 Processor 225H</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">CPU Model Speed Maximum</th>
+                            <td class="prodDetAttrValue">4.9 GHz</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="a-section-expander-container">
+                    <span class="a-expander-prompt">Item details</span>
+                    <table class="prodDetTable">
+                        <tr>
+                            <th class="prodDetSectionEntry">Brand Name</th>
+                            <td class="prodDetAttrValue">ASUS</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Model Name</th>
+                            <td class="prodDetAttrValue">ASUS Vivobook 16</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Model Number</th>
+                            <td class="prodDetAttrValue">X1607CA-MB142WS</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Manufacturer Part Number</th>
+                            <td class="prodDetAttrValue">90NB15A2-M007P0</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">ASIN</th>
+                            <td class="prodDetAttrValue">B0DT74FF9P</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Warranty Description</th>
+                            <td class="prodDetAttrValue">1 year Global Warranty</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">Customer Reviews</th>
+                            <td>
+                                <div id="averageCustomerReviews">
+                                    <span class="a-size-small a-color-base">3.9</span>
+                                    <span id="acrCustomerReviewText">68 Reviews</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="a-section-expander-container">
+                    <span class="a-expander-prompt">Memory</span>
+                    <table class="prodDetTable">
+                        <tr>
+                            <th class="prodDetSectionEntry">RAM Memory Installed</th>
+                            <td class="prodDetAttrValue">16 GB</td>
+                        </tr>
+                        <tr>
+                            <th class="prodDetSectionEntry">RAM Memory Technology</th>
+                            <td class="prodDetAttrValue">DDR5</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <input type="hidden" name="priceValue" value="88990.0" id="priceValue">
+            <input
+                type="hidden"
+                name="productTitle"
+                value="ASUS Vivobook 16, Intel Core Ultra 5 225H, 16GB RAM, 512GB SSD"
+                id="productTitle"
+            >
+            <input type="hidden" name="asin" value="B0DT74FF9P" id="asin">
+        </div>
+    </div>
+    """
+    now = datetime.now(UTC)
+    url = AnyHttpUrl("https://www.amazon.in/dp/B0DT74FF9P")
+
+    parsed = parse_amazon_payload(
+        payload={"html": html},
+        source_url=url,
+        source_product_id="B0DT74FF9P",
+        observed_at=now,
+        category="laptop",
+    )
+
+    assert parsed.brand == "Asus"
+    assert parsed.price_paise == 8899000
+    assert parsed.rating == 3.9
+    assert parsed.review_count == 68
+    assert parsed.attributes["cpu_model"] == "Intel Core Ultra 5 225H"
+    assert parsed.attributes["ram_gb"] == 16
+    assert parsed.attributes["ram_type"] == "DDR5"
+    assert parsed.attributes["storage_gb"] == 512
+    assert parsed.attributes["storage_type"] == "SSD"
+    assert parsed.attributes["screen_size_inches"] == 16.0
+    assert parsed.attributes["display_resolution"] == "WUXGA"
+    assert parsed.attributes["weight_kg"] == 1.88
+    assert parsed.attributes["battery_wh"] == 42.0
+    assert parsed.attributes["keyboard_backlight"] is True
+    assert parsed.attributes["wifi_standard"] == "Wi-Fi 6"
+    assert parsed.attributes["asin"] == "B0DT74FF9P"
+    assert parsed.attributes["mpn"] == "90NB15A2-M007P0"
+    assert parsed.attributes["warranty"] == "1 year Global Warranty"
+    spec_sec = parsed.attributes["spec_sections"]
+    assert isinstance(spec_sec, dict)
+    assert "Display" in spec_sec
+    assert "Processor" in spec_sec

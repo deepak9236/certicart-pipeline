@@ -500,3 +500,11 @@ def test_21_croma_detailed_specifications_accordion_html() -> None:
     )
     assert "Overview" in spec_sections
     assert "AMD Ryzen 7" in spec_sections["Overview"]["Description"]
+
+    # Verify retailer service/contact noise is strictly excluded
+    assert "customer support number" not in parsed.attributes
+    assert "customer support email" not in parsed.attributes
+    assert "registered name and address" not in parsed.attributes
+    assert "customer care contact person" not in parsed.attributes
+    assert "Company Contact Information" not in spec_sections
+    assert "Croma Service Promise" not in spec_sections

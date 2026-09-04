@@ -454,13 +454,22 @@ class LaptopIdentityNormalizer:
         if m:
             with contextlib.suppress(ValueError):
                 return float(m.group(1))
-        if specs and "weight" in specs:
-            m = re.search(r"(\d+(?:\.\d+)?)\s*kg", specs["weight"].casefold())
-            if m:
-                with contextlib.suppress(ValueError):
-                    val = float(m.group(1))
-                    if 0.5 <= val <= 10.0:
-                        return val
+        if specs:
+            for k in ("weight", "item weight", "product weight", "package weight"):
+                if k in specs:
+                    raw_w = specs[k].casefold()
+                    kg_g_m = re.search(r"(\d+)\s*kg\s*(\d+)\s*g", raw_w)
+                    if kg_g_m:
+                        with contextlib.suppress(ValueError):
+                            w_val = round(int(kg_g_m.group(1)) + int(kg_g_m.group(2)) / 1000.0, 2)
+                            if 0.5 <= w_val <= 10.0:
+                                return w_val
+                    m = re.search(r"(\d+(?:\.\d+)?)\s*kg", raw_w)
+                    if m:
+                        with contextlib.suppress(ValueError):
+                            val = float(m.group(1))
+                            if 0.5 <= val <= 10.0:
+                                return val
         return None
 
     @classmethod
@@ -471,9 +480,15 @@ class LaptopIdentityNormalizer:
             with contextlib.suppress(ValueError):
                 return float(m.group(1))
         if specs:
-            for k in ("battery cell", "battery", "battery capacity"):
+            for k in (
+                "battery cell",
+                "battery",
+                "battery capacity",
+                "standard battery life",
+                "lithium battery energy content",
+            ):
                 if k in specs:
-                    m = re.search(r"(\d{2,3}(?:\.\d)?)\s*wh", specs[k].casefold())
+                    m = re.search(r"(\d{2,3}(?:\.\d)?)\s*(?:wh|watt\s*hours)", specs[k].casefold())
                     if m:
                         with contextlib.suppress(ValueError):
                             val = float(m.group(1))
@@ -563,8 +578,9 @@ class LaptopIdentityNormalizer:
 
         # Build and validate through LaptopAttributes Pydantic schema
         from categories.electronics.laptop.schemas import LaptopAttributes
+        from sources.common import is_ignored_spec_key
 
-        extra = dict(extra_attributes or {})
+        extra = {k: v for k, v in (extra_attributes or {}).items() if not is_ignored_spec_key(k)}
         for explicit_k in (
             "ram_gb",
             "storage_gb",

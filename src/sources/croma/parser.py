@@ -15,6 +15,7 @@ from sources.common import (
     build_category_attributes,
     extract_digits_to_paise,
     infer_brand,
+    is_ignored_spec_key,
 )
 from sources.contracts import ParsedProduct, RawSourceRecord
 
@@ -42,12 +43,25 @@ def extract_croma_specs(
         section_name = heading_el.strip() if heading_el else ""
         if not section_name:
             continue
+        section_name_clean = normalize_text(section_name)
+        if any(
+            ignored in section_name_clean
+            for ignored in (
+                "company contact",
+                "service promise",
+                "packaged dimensions",
+                "croma service",
+            )
+        ):
+            continue
         section_specs: dict[str, str] = {}
 
         for title_el in block.css(".cp-specification-spec-title"):
             key_text = (
                 title_el.css("h4::text").get() or title_el.css("::text").get() or ""
             ).strip()
+            if is_ignored_spec_key(key_text):
+                continue
             v_pieces = title_el.xpath(
                 "following-sibling::*[contains(@class, 'cp-specification-spec-details')][1]//text()"
             ).getall()
@@ -73,6 +87,8 @@ def extract_croma_specs(
             or spec_row.css(".cp-specification-spec-title h4::text").get()
             or spec_row.css(".cp-specification-spec-title::text").get()
         )
+        if key_el and is_ignored_spec_key(key_el):
+            continue
         details_el = spec_row.css(
             "li.cp-specification-spec-details, .cp-specification-spec-details"
         )
@@ -93,6 +109,8 @@ def extract_croma_specs(
             continue
         if ":" in text:
             k, v = text.split(":", 1)
+            if is_ignored_spec_key(k):
+                continue
             k_clean = normalize_text(k)
             if k_clean not in specs:
                 specs[k_clean] = v.strip()
@@ -116,7 +134,7 @@ def extract_croma_specs(
     ):
         key_el = item.css(".spec-title::text, td:first-child::text, .key::text").get()
         val_el = item.css(".spec-desc::text, td:last-child::text, .value::text").get()
-        if key_el and val_el:
+        if key_el and val_el and not is_ignored_spec_key(key_el):
             k_clean = normalize_text(key_el)
             if k_clean not in specs:
                 specs[k_clean] = val_el.strip()
